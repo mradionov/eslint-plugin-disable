@@ -1,0 +1,24 @@
+{
+  "name": "eslint-plugin-disable",
+  "version": "0.0.0",
+  "description": "Disable ESLint plugins per file using inline comments",
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "disable",
+    "plugin"
+  ],
+  "author": "Michael Radionov (https://github.com/mradionov)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mradionov/eslint-plugin-disable.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "peerDependencies": {
+    "eslint": ">=0.16.0"
+  }
+}
