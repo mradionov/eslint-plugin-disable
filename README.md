@@ -3,6 +3,14 @@ eslint-plugin-disable
 
 > Disable ESLint plugins per file using inline comments
 
+```js
+/* eslint-plugin-disable angular */
+
+function greet(name) {
+  console.log('Hi, ' + name);
+}
+```
+
 #### Origin
 
 The goal is to add an ability of entirely disabling ESLint plugins for particular JS files via inline comments. Unfortunately this feature is not natively supported in ESLint yet, so this module may become a temporary workaround. Read the following issues for additional information:
@@ -61,3 +69,4 @@ function greet(name) {
 #### Support
 
 ESLint >= 0.16.0
+Processed file extensions: .js, .jsx
