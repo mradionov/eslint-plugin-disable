@@ -16,7 +16,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "test": "node test.js"
+    "test": "tape 'test/**/*.js'"
   },
   "peerDependencies": {
     "eslint": ">=0.16.0"
@@ -24,5 +24,8 @@
   "dependencies": {
     "multimatch": "^2.1.0",
     "resolve": "^1.1.6"
+  },
+  "devDependencies": {
+    "tape": "^4.2.2"
   }
 }

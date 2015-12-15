@@ -6,8 +6,8 @@
 
 var resolve = require('resolve');
 
-var prepare = require('./src/settings').prepare;
-var processor = require('./src/processor').factory;
+var settings = require('./src/settings');
+var processor = require('./src/processor');
 
 //------------------------------------------------------------------------------
 // Private
@@ -24,19 +24,16 @@ var engine = new eslint.CLIEngine();
 var config = engine.getConfigForFile();
 
 // Prepare settings for processors
-var defaultSettings = {
-  extensions: ['.js', '.jsx']
-};
-var settings = prepare(config, defaultSettings);
+var pluginSettings = settings.prepare(config);
 
 // Store informaton about what plugins to disable for particular files
 var cache = {};
 
 // Process only files with specified extensions
 var processors = {};
-settings.extensions.forEach(function (ext) {
+pluginSettings.extensions.forEach(function (ext) {
   // Re-use the same cache for all processors, it will be modified by reference
-  processors[ext] = processor(settings, cache);
+  processors[ext] = processor.factory(pluginSettings, cache);
 });
 
 //------------------------------------------------------------------------------
