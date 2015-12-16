@@ -76,11 +76,10 @@ function factory(settings, cache) {
       }
 
       // Check if all plugins are disabled, it takes precedence over single plugin
-      var allIndex = plugins.indexOf(DISABLE_ALL);
-      if (allIndex > -1) {
+      if (plugins.indexOf(DISABLE_ALL) > -1) {
         cache[filename] = true;
       } else {
-        cache[filename] = plugins.splice(allIndex, 1);
+        cache[filename] = plugins;
       }
 
       // ESLint requires a result to be an array of processable text blocks
