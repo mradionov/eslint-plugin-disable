@@ -12,7 +12,10 @@ var PLUGIN_NAME = 'eslint-plugin-disable';
 
 // Default settings
 var defaults = {
-  extensions: ['.js', '.jsx']
+  extensions: ['.js', '.jsx'],
+  pathsOptions: {
+    matchBase: true
+  }
 };
 
 /**
@@ -40,6 +43,9 @@ function prepare(config) {
       paths: paths
     };
   });
+
+  // Set options for multimatch module
+  settings.pathsOptions = settings.pathsOptions || defaults.pathsOptions;
 
   return settings;
 }

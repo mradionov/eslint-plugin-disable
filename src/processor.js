@@ -64,7 +64,7 @@ function factory(settings, cache) {
       // Resolve all paths and find plugins which have matched paths
       var plugins = [];
       settings.paths.forEach(function (opt) {
-        var matches = multimatch(filename, opt.paths, { matchBase: true });
+        var matches = multimatch(filename, opt.paths, settings.pathsOptions);
         if (matches.length) {
           plugins.push(opt.plugin);
         }

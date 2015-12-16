@@ -20,7 +20,10 @@ function settings(paths) {
         plugin: plugin,
         paths: paths[plugin]
       };
-    })
+    }),
+    pathsOptions: {
+      matchBase: true
+    }
   };
 }
 
