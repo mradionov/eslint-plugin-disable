@@ -18,9 +18,6 @@
   "scripts": {
     "test": "tape 'test/**/*.js'"
   },
-  "peerDependencies": {
-    "eslint": ">=0.16.0"
-  },
   "dependencies": {
     "multimatch": "^2.1.0",
     "resolve": "^1.1.6"
