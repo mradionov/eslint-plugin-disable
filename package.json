@@ -1,7 +1,7 @@
 {
   "name": "eslint-plugin-disable",
   "version": "0.1.0",
-  "description": "Disable ESLint plugins per file using inline comments",
+  "description": "Disable ESLint plugins using file patterns and inline comments",
   "keywords": [
     "eslint",
     "eslintplugin",
