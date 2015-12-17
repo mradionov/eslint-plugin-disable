@@ -41,46 +41,50 @@ function factory(settings, cache) {
   return {
 
     preprocess: function (text, filename) {
-      // Reset file options on start
-      delete cache[filename];
-
       // ESLint requires a result to be an array of processable text blocks
       var out = [text];
 
+      // Do nothing if there is no plugins registered
+      if (!settings.plugins.length) {
+        return out;
+      }
+
+      // Reset file options on start
+      delete cache[filename];
+
+      // Capture group for plugins will be empty if no plugins specified,
+      // in this case all plugins will be disabled. Otherwise, strip all
+      // whitespaces and cache plugin names for a current file
       var match = text.match(DISABLE_PATTERN);
       if (match) {
-        cache[filename] = true;
-        // Capture group for plugins will be empty if no plugins specified,
-        // in this case all plugins will be disabled. Otherwise, strip all
-        // whitespaces and cache plugin names for a current file
         if (match[1]) {
-          cache[filename] = match[1].replace(/\s/g, '').split(',');
+          var inlinePlugins = match[1].replace(/\s/g, '').split(',');
+          cache[filename] = inlinePlugins.filter(function (plugin) {
+            // Remove non-registered plugins
+            return settings.plugins.indexOf(plugin) > -1;
+          });
+        } else {
+          // Disable all plugins
+          cache[filename] = settings.plugins;
         }
 
         // Inline rule takes precedence, no need to check file pattern
         return out;
       }
 
-      // Resolve all paths and find plugins which have matched paths
-      var plugins = [];
-      settings.paths.forEach(function (opt) {
-        var matches = multimatch(filename, opt.paths, settings.pathsOptions);
-        if (matches.length) {
-          plugins.push(opt.plugin);
-        }
+      // Save paths from the option which stands for "all plugins"
+      // These paths will be combined with paths for "real" plugins,
+      // so user could negate paths. Also filter out non-registered plugins
+      var commonPaths = settings.paths[DISABLE_ALL] || [];
+      delete settings.paths[DISABLE_ALL];
+
+      var plugins = settings.plugins.filter(function (plugin) {
+        var paths = (settings.paths[plugin] || []).concat(commonPaths);
+        var matches = multimatch(filename, paths, settings.pathsOptions);
+        return matches.length;
       });
 
-      // If not plugins found - nothing to process
-      if (!plugins.length) {
-        return out;
-      }
-
-      // Check if all plugins are disabled, it takes precedence over single plugin
-      if (plugins.indexOf(DISABLE_ALL) > -1) {
-        cache[filename] = true;
-      } else {
-        cache[filename] = plugins;
-      }
+      cache[filename] = plugins;
 
       // ESLint requires a result to be an array of processable text blocks
       return out;
@@ -97,16 +101,7 @@ function factory(settings, cache) {
       var out = messages[0].filter(function (message) {
         // Plugin rules are prefixed with plugin name: "plugin/some-rule"
         var parts = message.ruleId.split('/');
-        // Keep rule if it is not a part of any plugin
-        if (parts.length !== 2) {
-          return true;
-        }
-        // If all plugins are disabled or current plugin is disabled -
-        // remove error/warning message for plugin from the results
-        if (cache[filename] === true || cache[filename].indexOf(parts[0]) > -1) {
-          return false;
-        }
-        return true;
+        return !(parts.length === 2 && cache[filename].indexOf(parts[0]) > -1);
       });
       // Remove cache for file, no need to store it
       delete cache[filename];

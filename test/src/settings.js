@@ -9,89 +9,112 @@ var test = require('tape');
 var settings = require('../../src/settings');
 
 //------------------------------------------------------------------------------
-// Helpers
-//------------------------------------------------------------------------------
-
-function plugin(settings) {
-  return {
-    settings: {
-      'eslint-plugin-disable': settings
-    }
-  };
-};
-
-//------------------------------------------------------------------------------
 // Tests
 //------------------------------------------------------------------------------
 
 test('settings: default settings for falsy config', function (t) {
-  var sets = settings.prepare(null);
-  t.deepEqual(sets.paths, []);
-  t.deepEqual(sets.pathsOptions, settings.defaults.pathsOptions);
-  t.deepEqual(sets.extensions, settings.defaults.extensions);
+  var pluginSettings = settings.prepare(null);
+  t.deepEqual(pluginSettings.paths, {});
+  t.deepEqual(pluginSettings.pathsOptions, settings.defaults.pathsOptions);
+  t.deepEqual(pluginSettings.extensions, settings.defaults.extensions);
+  t.deepEqual(pluginSettings.plugins, []);
   t.end();
 });
 
 test('settings: default settings for undefined settings', function (t) {
-  var sets = settings.prepare({});
-  t.deepEqual(sets.paths, []);
-  t.deepEqual(sets.pathsOptions, settings.defaults.pathsOptions);
-  t.deepEqual(sets.extensions, settings.defaults.extensions);
+  var pluginSettings = settings.prepare({});
+  t.deepEqual(pluginSettings.paths, {});
+  t.deepEqual(pluginSettings.pathsOptions, settings.defaults.pathsOptions);
+  t.deepEqual(pluginSettings.extensions, settings.defaults.extensions);
+  t.deepEqual(pluginSettings.plugins, []);
   t.end();
 });
 
 test('settings: default settings for undefined plugin settings', function (t) {
-  var sets = settings.prepare({ settings: {} });
-  t.deepEqual(sets.paths, []);
-  t.deepEqual(sets.pathsOptions, settings.defaults.pathsOptions);
-  t.deepEqual(sets.extensions, settings.defaults.extensions);
+  var pluginSettings = settings.prepare({
+    settings: {}
+  });
+  t.deepEqual(pluginSettings.paths, {});
+  t.deepEqual(pluginSettings.pathsOptions, settings.defaults.pathsOptions);
+  t.deepEqual(pluginSettings.extensions, settings.defaults.extensions);
+  t.deepEqual(pluginSettings.plugins, []);
   t.end();
 });
 
 test('settings: default settings for empty plugin settings', function (t) {
-  var sets = settings.prepare({ settings: { 'eslint-plugin-disable': {} }});
-  t.deepEqual(sets.paths, []);
-  t.deepEqual(sets.pathsOptions, settings.defaults.pathsOptions);
-  t.deepEqual(sets.extensions, settings.defaults.extensions);
+  var pluginSettings = settings.prepare({
+    settings: {
+      'eslint-plugin-disable': {}
+    }
+  });
+  t.deepEqual(pluginSettings.paths, {});
+  t.deepEqual(pluginSettings.pathsOptions, settings.defaults.pathsOptions);
+  t.deepEqual(pluginSettings.extensions, settings.defaults.extensions);
+  t.deepEqual(pluginSettings.plugins, []);
   t.end();
 });
 
 test('settings: use passed extensions', function (t) {
-  var sets = settings.prepare(plugin({ extensions: ['.foo', '.bar'] }));
-  t.deepEqual(sets.extensions, ['.foo', '.bar']);
+  var pluginSettings = settings.prepare({
+    settings: {
+      'eslint-plugin-disable': {
+        extensions: ['.foo', '.bar']
+      }
+    }
+  });
+  t.deepEqual(pluginSettings.extensions, ['.foo', '.bar']);
   t.end();
 });
 
 test('settings: use passed path options', function (t) {
-  var sets = settings.prepare(plugin({ pathsOptions: { foo: true, bar: false } }));
-  t.deepEqual(sets.pathsOptions, { foo: true, bar: false });
+  var pluginSettings = settings.prepare({
+    settings: {
+      'eslint-plugin-disable': {
+        pathsOptions: { foo: true, bar: false }
+      }
+    }
+  });
+  t.deepEqual(pluginSettings.pathsOptions, { foo: true, bar: false });
   t.end();
 });
 
-test('settings: convert to array single string extension', function (t) {
-  var sets = settings.prepare(plugin({ extensions: '.foo' }));
-  t.deepEqual(sets.extensions, ['.foo']);
+test('settings: append plugins from config', function (t) {
+  var pluginSettings = settings.prepare({
+    plugins:  ['foo', 'bar']
+  });
+  t.deepEqual(pluginSettings.plugins, ['foo', 'bar']);
   t.end();
 });
 
-test('settings: modify paths to array', function (t) {
-  var sets = settings.prepare(plugin({ paths: {
-    'foo': ['/foo/1', '/foo/2'],
-    'bar': ['/bar/1']
-  }}));
-  t.deepEqual(sets.paths, [
-    { plugin: 'foo', paths: ['/foo/1', '/foo/2'] },
-    { plugin: 'bar', paths: ['/bar/1'] }
-  ]);
+test('settings: use passed plugins', function (t) {
+  var pluginSettings = settings.prepare({
+    plugins: ['foo', 'bar'],
+    settings: {
+      'eslint-plugin-disable': {
+        plugins: ['baz', 'qux']
+      }
+    }
+  });
+  t.deepEqual(pluginSettings.plugins, ['baz', 'qux']);
   t.end();
 });
 
-test('settings: convert to array single string path', function (t) {
-  var sets = settings.prepare(plugin({ paths: {
-    'foo': '/foo/1'
-  }}));
-  t.deepEqual(sets.paths, [
-    { plugin: 'foo', paths: ['/foo/1'] }
-  ]);
+test('settings: remove plugin itself from config', function (t) {
+  var pluginSettings = settings.prepare({
+    plugins: ['foo', 'disable', 'bar']
+  });
+  t.deepEqual(pluginSettings.plugins, ['foo', 'bar']);
+  t.end();
+});
+
+test('settings: remove plugin itself from passed', function (t) {
+  var pluginSettings = settings.prepare({
+    settings: {
+      'eslint-plugin-disable': {
+        plugins: ['foo', 'disable', 'bar']
+      }
+    }
+  });
+  t.deepEqual(pluginSettings.plugins, ['foo', 'bar']);
   t.end();
 });

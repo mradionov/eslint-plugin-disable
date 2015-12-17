@@ -5,6 +5,7 @@
 //------------------------------------------------------------------------------
 
 var PLUGIN_NAME = 'eslint-plugin-disable';
+var PLUGIN_NAME_SHORT = 'disable';
 
 //------------------------------------------------------------------------------
 // Private
@@ -24,28 +25,23 @@ var defaults = {
  * @return {Object}        prettified settings object
  */
 function prepare(config) {
-  var settings = config && config.settings && config.settings[PLUGIN_NAME] || {};
+  config = config || {};
+  var settings = config.settings && config.settings[PLUGIN_NAME] || {};
 
-  // Extensions, let user override defaults, let user pass a string (single ext)
-  settings.extensions = settings.extensions || defaults.extensions;
-  if (!Array.isArray(settings.extensions)) {
-    settings.extensions = [settings.extensions];
-  }
-
-  // Paths, simplify settings structure for paths, let user pass a string
-  settings.paths = Object.keys(settings.paths || {}).map(function (plugin) {
-    var paths = settings.paths[plugin];
-    if (!Array.isArray(paths)) {
-      paths = [paths];
-    }
-    return {
-      plugin: plugin,
-      paths: paths
-    };
-  });
+  settings.paths = settings.paths || {};
 
   // Set options for multimatch module
   settings.pathsOptions = settings.pathsOptions || defaults.pathsOptions;
+
+  // Extensions, let user override defaults
+  settings.extensions = settings.extensions || defaults.extensions;
+
+  // Forward plugins from config or use custom ones, remove current plugin
+  settings.plugins = settings.plugins || config.plugins || [];
+  var index = settings.plugins.indexOf(PLUGIN_NAME_SHORT);
+  if (index > -1) {
+    settings.plugins.splice(index, 1);
+  }
 
   return settings;
 }
