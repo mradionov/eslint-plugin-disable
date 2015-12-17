@@ -19,7 +19,7 @@ eslint-plugin-disable
   {
     "settings": {
       "eslint-plugin-disable": {
-        "angular": ["/lib/**/*.js"]
+        "angular": ["**/lib/**/*.js"]
       }
     }
   }
@@ -83,15 +83,15 @@ function greet(name) {
 
 #### File paths
 
-To disable plugins for file paths use `paths` option in config settings (.eslintrc). It is an object, where key is a name of the plugin to disable, and value is an array of patterns to match against file name. To target all plugins use `*` as a key.
+To disable plugins for file paths use `paths` option in config settings (.eslintrc). It is an object, where key is a name of the plugin to disable, and value is an array of patterns to match against file name. To target all plugins use `*` as a key. Make sure to start paths with `**`, because match is done against absolute path to a file.
 
 ```js
 {
   "settings": {
     "eslint-plugin-disable": {
       "paths": {
-        "angular": ["/lib/**/*.js"],
-        "react": ["/app/module/*.service.js", "**/*.test.jsx"],
+        "angular": ["**/lib/**/*.js"],
+        "react": ["**/app/module/*.service.js", "**/*.test.jsx"],
         "*": ["config.js"]
       }
     }
@@ -106,7 +106,7 @@ Take a look at [minimatch](https://github.com/isaacs/minimatch) to learn more ab
   "settings": {
     "eslint-plugin-disable": {
       "paths": {
-        "angular": ["/lib/**/*.js"]
+        "angular": ["**/lib/**/*.js"]
       },
       "pathsOptions": {
         "matchBase": false,
