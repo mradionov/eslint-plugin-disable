@@ -79,7 +79,8 @@ function factory(settings, cache) {
       delete settings.paths[DISABLE_ALL];
 
       var plugins = settings.plugins.filter(function (plugin) {
-        var paths = (settings.paths[plugin] || []).concat(commonPaths);
+        // Order of concat matters, now plugin paths can negate common paths
+        var paths = commonPaths.concat(settings.paths[plugin] || []);
         var matches = multimatch(filename, paths, settings.pathsOptions);
         return matches.length;
       });
