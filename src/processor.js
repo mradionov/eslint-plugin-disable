@@ -12,7 +12,7 @@ var multimatch = require('multimatch');
 // Constants
 //------------------------------------------------------------------------------
 
-// Patern to detect usage if a custom rule in a source code.
+// Patern to detect usage of a custom rule in a source code.
 // Custom rule should have a form of a block comment.
 // All whitespaces within comment block are ignored.
 // Example:
@@ -52,11 +52,11 @@ function factory(settings, cache) {
       // Reset file options on start
       delete cache[filename];
 
-      // Capture group for plugins will be empty if no plugins specified,
-      // in this case all plugins will be disabled. Otherwise, strip all
-      // whitespaces and cache plugin names for a current file
       var match = text.match(DISABLE_PATTERN);
       if (match) {
+        // Capture group for plugins will be empty if no plugins specified,
+        // in this case all plugins will be disabled. Otherwise, strip all
+        // whitespaces and cache plugin names for a current file
         if (match[1]) {
           var inlinePlugins = match[1].replace(/\s/g, '').split(',');
           cache[filename] = inlinePlugins.filter(function (plugin) {
@@ -81,8 +81,18 @@ function factory(settings, cache) {
       var plugins = settings.plugins.filter(function (plugin) {
         // Order of concat matters, now plugin paths can negate common paths
         var paths = commonPaths.concat(settings.paths[plugin] || []);
+        if (settings.prependGlobStar && !settings.pathsOptions.noglobstar) {
+          paths = paths.map(function (path) {
+            // If path is not absolute and if it targets a directory
+            if (path.charAt(0) !== '/' && path.indexOf('/') > -1) {
+              path = '**/' + path;
+            }
+            return path;
+          });
+        }
         var matches = multimatch(filename, paths, settings.pathsOptions);
-        return matches.length;
+        // Disable plugin if it matches any path
+        return matches.length > 0;
       });
 
       cache[filename] = plugins;

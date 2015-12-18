@@ -19,7 +19,7 @@ eslint-plugin-disable
   {
     "settings": {
       "eslint-plugin-disable": {
-        "angular": ["**/lib/**/*.js"]
+        "angular": ["lib/**/*.js"]
       }
     }
   }
@@ -90,8 +90,8 @@ To disable plugins for file paths use `paths` option in config settings (.eslint
   "settings": {
     "eslint-plugin-disable": {
       "paths": {
-        "angular": ["**/lib/**/*.js"],
-        "react": ["**/app/module/*.service.js", "**/*.test.jsx"],
+        "angular": ["lib/**/*.js"],
+        "react": ["app/module/*.service.js", "*.test.jsx"],
         "*": ["config.js"]
       }
     }
@@ -106,12 +106,27 @@ Take a look at [minimatch](https://github.com/isaacs/minimatch) to learn more ab
   "settings": {
     "eslint-plugin-disable": {
       "paths": {
-        "angular": ["**/lib/**/*.js"]
+        "angular": ["lib/**/*.js"]
       },
       "pathsOptions": {
         "matchBase": false,
         "noglobstar": true
       }
+    }
+  }
+}
+```
+
+Because ESLint uses absolute paths and it is difficult to correctly locate base path of your project from within a plugin, there is a custom option which adds "glob star" `**/` to the beginning of each path pattern, if it does not start with a slash and has at least one slash in between (targets directory). This option is enabled by default, set `prependGlobStar` to `false` to turn it off, but you'll have to manually target absolute path in patterns then. Also option won't work, if you've set `pathsOptions: { noglobstar: false }`, because it doesn't allow to use "glob star". All these tricks around absolute paths may lead to unexpected behavior, so it is encouraged to use complete paths to folders you want to disable to leverage the risk of targeting wrong directories and files.
+
+```js
+{
+  "settings": {
+    "eslint-plugin-disable": {
+      "paths": {
+        "angular": ["**/lib/**/*.js"]
+      },
+      "prependGlobStar": false
     }
   }
 }
