@@ -134,3 +134,47 @@ test('settings: use passed prependGlobStar', function (t) {
   t.equal(pluginSettings.prependGlobStar, false);
   t.end();
 });
+
+test('settings: convert paths to arrays', function (t) {
+  var pluginSettings = settings.prepare({
+    settings: {
+      'eslint-plugin-disable': {
+        paths: {
+          '*': '*',
+          'foo': '/foo/1',
+          'bar': ['/bar/1']
+        }
+      }
+    }
+  });
+  t.deepEqual(pluginSettings.paths, {
+    '*': ['*'],
+    'foo': ['/foo/1'],
+    'bar': ['/bar/1']
+  });
+  t.end();
+});
+
+test('settings: convert extensions to array', function (t) {
+  var pluginSettings = settings.prepare({
+    settings: {
+      'eslint-plugin-disable': {
+        extensions: '.foo'
+      }
+    }
+  });
+  t.deepEqual(pluginSettings.extensions, ['.foo']);
+  t.end();
+});
+
+test('settings: convert plugins to array', function (t) {
+  var pluginSettings = settings.prepare({
+    settings: {
+      'eslint-plugin-disable': {
+        plugins: 'foo'
+      }
+    }
+  });
+  t.deepEqual(pluginSettings.plugins, ['foo']);
+  t.end();
+});
