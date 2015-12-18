@@ -81,15 +81,6 @@ function factory(settings, cache) {
       var plugins = settings.plugins.filter(function (plugin) {
         // Order of concat matters, now plugin paths can negate common paths
         var paths = commonPaths.concat(settings.paths[plugin] || []);
-        if (settings.prependGlobStar && !settings.pathsOptions.noglobstar) {
-          paths = paths.map(function (path) {
-            // If path is not absolute and if it targets a directory
-            if (path.charAt(0) !== '/' && path.indexOf('/') > -1) {
-              path = '**/' + path;
-            }
-            return path;
-          });
-        }
         var matches = multimatch(filename, paths, settings.pathsOptions);
         // Disable plugin if it matches any path
         return matches.length > 0;

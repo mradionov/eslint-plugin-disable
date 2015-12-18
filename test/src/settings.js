@@ -18,7 +18,6 @@ test('settings: default settings for falsy config', function (t) {
   t.deepEqual(pluginSettings.pathsOptions, settings.defaults.pathsOptions);
   t.deepEqual(pluginSettings.extensions, settings.defaults.extensions);
   t.deepEqual(pluginSettings.plugins, []);
-  t.deepEqual(pluginSettings.prependGlobStar, true);
   t.end();
 });
 
@@ -28,7 +27,6 @@ test('settings: default settings for undefined settings', function (t) {
   t.deepEqual(pluginSettings.pathsOptions, settings.defaults.pathsOptions);
   t.deepEqual(pluginSettings.extensions, settings.defaults.extensions);
   t.deepEqual(pluginSettings.plugins, []);
-  t.deepEqual(pluginSettings.prependGlobStar, true);
   t.end();
 });
 
@@ -40,7 +38,6 @@ test('settings: default settings for undefined plugin settings', function (t) {
   t.deepEqual(pluginSettings.pathsOptions, settings.defaults.pathsOptions);
   t.deepEqual(pluginSettings.extensions, settings.defaults.extensions);
   t.deepEqual(pluginSettings.plugins, []);
-  t.deepEqual(pluginSettings.prependGlobStar, true);
   t.end();
 });
 
@@ -54,7 +51,6 @@ test('settings: default settings for empty plugin settings', function (t) {
   t.deepEqual(pluginSettings.pathsOptions, settings.defaults.pathsOptions);
   t.deepEqual(pluginSettings.extensions, settings.defaults.extensions);
   t.deepEqual(pluginSettings.plugins, []);
-  t.deepEqual(pluginSettings.prependGlobStar, true);
   t.end();
 });
 
@@ -120,18 +116,6 @@ test('settings: remove plugin itself from passed', function (t) {
     }
   });
   t.deepEqual(pluginSettings.plugins, ['foo', 'bar']);
-  t.end();
-});
-
-test('settings: use passed prependGlobStar', function (t) {
-  var pluginSettings = settings.prepare({
-    settings: {
-      'eslint-plugin-disable': {
-        prependGlobStar: false
-      }
-    }
-  });
-  t.equal(pluginSettings.prependGlobStar, false);
   t.end();
 });
 

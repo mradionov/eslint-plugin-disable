@@ -45,11 +45,6 @@ function prepare(config) {
   // Set options for multimatch module
   settings.pathsOptions = settings.pathsOptions || defaults.pathsOptions;
 
-  // Prepend stars by default
-  if (settings.prependGlobStar === undefined) {
-    settings.prependGlobStar = true;
-  }
-
   // Extensions, let user override defaults
   settings.extensions = toArray(settings.extensions || defaults.extensions);
 
