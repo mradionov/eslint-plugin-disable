@@ -117,7 +117,7 @@ Take a look at [minimatch](https://github.com/isaacs/minimatch) to learn more ab
 }
 ```
 
-* Note: Because ESLint uses absolute paths and it is difficult to correctly locate base path of your project from within a plugin, so it is highly suggested to use complete paths to folders you want to disable to leverage the risk of targeting wrong directories and files. *
+*Note: Because ESLint uses absolute paths and it is difficult to correctly locate base path of your project from within a plugin, so it is highly suggested to use complete paths to folders you want to disable to leverage the risk of targeting wrong directories and files.*
 
 #### Processed extensions
 
