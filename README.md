@@ -99,6 +99,21 @@ To disable plugins for file paths use `paths` option in config settings (.eslint
 }
 ```
 
+To disable everything but particular folder you can use path negation.
+
+```js
+{
+  "settings": {
+    "eslint-plugin-disable": {
+      "paths": {
+        "*": ["*"],
+        "angular": ["!**/app/**/*.js"]
+      }
+    }
+  }
+}
+```
+
 Take a look at [minimatch](https://github.com/isaacs/minimatch) to learn more about file patterns available for use. To pass custom options to [minimatch](https://github.com/isaacs/minimatch), modify `pathsOptions` setting. `matchBase` option is turned on by default.
 
  ```js
