@@ -101,6 +101,7 @@ function factory(settings, cache) {
       }
       // Remove all disabled plugin messages
       var out = messages[0].filter(function (message) {
+        if (!message.ruleId) return true;
         // Plugin rules are prefixed with plugin name: "plugin/some-rule"
         var parts = message.ruleId.split('/');
         return !(parts.length === 2 && cache[filename].indexOf(parts[0]) > -1);
