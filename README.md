@@ -158,5 +158,6 @@ ESLint >= 0.16.0
 
 ## Changelog
 
+- 0.2.1 - Prevent crash when ESLint fails to parse a source
 - 0.2.0 - Disable paths via settings in ESLint config
 - 0.1.0 - Disable particular files via inline comments
