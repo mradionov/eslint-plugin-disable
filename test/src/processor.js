@@ -239,3 +239,20 @@ test('postprocess: remove one plugin', function (t) {
   t.deepEqual(cache, {});
   t.end();
 });
+
+test('postprocess: keep message without rule', function (t) {
+  var cache = { '/foo/1': ['foo'], };
+  var settings = {
+    plugins: ['foo']
+  };
+  var messages = [
+    { ruleId: undefined }
+  ];
+  var pluginProcessor = processor.factory(settings, cache);
+  var messageBlocks = pluginProcessor.postprocess([messages], '/foo/1');
+  t.deepEqual(messageBlocks, [
+    { ruleId: undefined }
+  ]);
+  t.deepEqual(cache, {});
+  t.end();
+});

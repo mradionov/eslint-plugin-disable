@@ -100,11 +100,18 @@ function factory(settings, cache) {
         return messages[0];
       }
       // Remove all disabled plugin messages
+      // Return "true" to keep message for rule, "false" - to remove
       var out = messages[0].filter(function (message) {
+        // Rule is undefined if ESLint fails to parse source file
         if (!message.ruleId) return true;
+
         // Plugin rules are prefixed with plugin name: "plugin/some-rule"
         var parts = message.ruleId.split('/');
-        return !(parts.length === 2 && cache[filename].indexOf(parts[0]) > -1);
+        var isRemovable = (parts.length === 2 &&
+                          cache[filename].indexOf(parts[0]) > -1);
+
+        // Return "false" to remove a message
+        return !isRemovable;
       });
       // Remove cache for file, no need to store it
       delete cache[filename];
