@@ -15,6 +15,7 @@ var settings = require('../../src/settings');
 test('settings: default settings for falsy config', function (t) {
   var pluginSettings = settings.prepare(null);
   t.deepEqual(pluginSettings.paths, {});
+  t.deepEqual(pluginSettings.allExceptPaths, {});
   t.deepEqual(pluginSettings.pathsOptions, settings.defaults.pathsOptions);
   t.deepEqual(pluginSettings.extensions, settings.defaults.extensions);
   t.deepEqual(pluginSettings.plugins, []);
@@ -23,7 +24,9 @@ test('settings: default settings for falsy config', function (t) {
 
 test('settings: default settings for undefined settings', function (t) {
   var pluginSettings = settings.prepare({});
+
   t.deepEqual(pluginSettings.paths, {});
+  t.deepEqual(pluginSettings.allExceptPaths, {});
   t.deepEqual(pluginSettings.pathsOptions, settings.defaults.pathsOptions);
   t.deepEqual(pluginSettings.extensions, settings.defaults.extensions);
   t.deepEqual(pluginSettings.plugins, []);
@@ -35,6 +38,7 @@ test('settings: default settings for undefined plugin settings', function (t) {
     settings: {}
   });
   t.deepEqual(pluginSettings.paths, {});
+  t.deepEqual(pluginSettings.allExceptPaths, {});
   t.deepEqual(pluginSettings.pathsOptions, settings.defaults.pathsOptions);
   t.deepEqual(pluginSettings.extensions, settings.defaults.extensions);
   t.deepEqual(pluginSettings.plugins, []);
@@ -48,6 +52,7 @@ test('settings: default settings for empty plugin settings', function (t) {
     }
   });
   t.deepEqual(pluginSettings.paths, {});
+  t.deepEqual(pluginSettings.allExceptPaths, {});
   t.deepEqual(pluginSettings.pathsOptions, settings.defaults.pathsOptions);
   t.deepEqual(pluginSettings.extensions, settings.defaults.extensions);
   t.deepEqual(pluginSettings.plugins, []);
@@ -132,6 +137,26 @@ test('settings: convert paths to arrays', function (t) {
     }
   });
   t.deepEqual(pluginSettings.paths, {
+    '*': ['*'],
+    'foo': ['/foo/1'],
+    'bar': ['/bar/1']
+  });
+  t.end();
+});
+
+test('settingsL convert allExceptPaths to arrays', function (t) {
+  var pluginSettings = settings.prepare({
+    settings: {
+      'eslint-plugin-disable': {
+        allExceptPaths: {
+          '*': '*',
+          'foo': '/foo/1',
+          'bar': ['/bar/1']
+        }
+      }
+    }
+  });
+  t.deepEqual(pluginSettings.allExceptPaths, {
     '*': ['*'],
     'foo': ['/foo/1'],
     'bar': ['/bar/1']

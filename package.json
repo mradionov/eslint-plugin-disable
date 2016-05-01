@@ -16,7 +16,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "test": "tape 'test/**/*.js'"
+    "test": "tape 'test/**/*.test.js'"
   },
   "peerDependencies": {
     "eslint": ">=0.16.0"

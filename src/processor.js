@@ -21,10 +21,64 @@ var multimatch = require('multimatch');
 //    /* eslint-plugin-disable angular, react */
 //    /* eslint-plugin-disable */
 //
-var DISABLE_PATTERN = /\/\*\s*eslint-plugin-disable\s*([\S\s]*?)\*\//;
+var DISABLE_PATTERN =
+  /\/\*\s*eslint-plugin-disable\s*([\S\s]*?)\*\//;
+
+var DISABLE_ALL_EXCEPT_PATTERN =
+  /\/\*\s*eslint-plugin-disable-all-except\s*([\S\s]*?)\*\//;
 
 // Key for config settings to disable all plugins
-var DISABLE_ALL = '*';
+var ALL_PLUGINS = '*';
+
+//------------------------------------------------------------------------------
+// Helpers
+//------------------------------------------------------------------------------
+
+function getInlinePlugins(text, pattern, availablePlugins) {
+  var match = text.match(pattern);
+  // Return null if not match to make decisions based on it
+  if (!match) return null;
+  // Capture group [1] for plugins will be empty if no plugins specified
+  if (!match[1]) return [];
+
+  var inlinePlugins = match[1].replace(/\s/g, '').split(',');
+
+  var validInlinePlugins = inlinePlugins.filter(function (plugin) {
+    // Remove not registered plugins
+    return availablePlugins.indexOf(plugin) > -1;
+  });
+
+  return validInlinePlugins;
+}
+
+function getSettingsPlugins(
+  filename, pathsToMatch, ignoreStar, availablePlugins, pathsOptions
+) {
+  pathsToMatch = pathsToMatch || {};
+
+  // Save paths from the option which stands for "all plugins"
+  // These paths will be combined with paths for "real" plugins,
+  // so user could negate paths. Also filters out not registered plugins
+  var commonPaths = pathsToMatch[ALL_PLUGINS] || [];
+  delete pathsToMatch[ALL_PLUGINS];
+
+  var matchedPlugins = availablePlugins.filter(function (plugin) {
+
+    var pluginPathsToMatch = pathsToMatch[plugin] || [];
+
+    // Order of concat matters, now plugin paths can negate common paths
+    var paths = ignoreStar
+      ? pluginPathsToMatch
+      : commonPaths.concat(pluginPathsToMatch);
+
+    var matches = multimatch(filename, paths, pathsOptions);
+
+    // Save plugin if it matches any path
+    return matches.length > 0;
+  });
+
+  return matchedPlugins;
+}
 
 //------------------------------------------------------------------------------
 // Private
@@ -40,53 +94,133 @@ function factory(settings, cache) {
 
   return {
 
+    // Options are not combined, but executed separately in this order:
+    // 1. Disable "all except" via inline comments
+    // 2. Disable via inline comments
+    // 3. Disable "all except" via settings
+    // 4. Disable via settings
     preprocess: function (text, filename) {
       // ESLint requires a result to be an array of processable text blocks
       var out = [text];
 
       // Do nothing if there is no plugins registered
-      if (!settings.plugins.length) {
-        return out;
-      }
+      if (!settings.plugins.length) return out;
 
       // Reset file options on start
       delete cache[filename];
 
-      var match = text.match(DISABLE_PATTERN);
-      if (match) {
-        // Capture group for plugins will be empty if no plugins specified,
-        // in this case all plugins will be disabled. Otherwise, strip all
-        // whitespaces and cache plugin names for a current file
-        if (match[1]) {
-          var inlinePlugins = match[1].replace(/\s/g, '').split(',');
-          cache[filename] = inlinePlugins.filter(function (plugin) {
-            // Remove non-registered plugins
-            return settings.plugins.indexOf(plugin) > -1;
+      // -----------------------------------------------------------------------
+      // 1. Disable "all except" via inline comments
+      // -----------------------------------------------------------------------
+
+      var allExceptInlinePlugins = getInlinePlugins(
+        text, DISABLE_ALL_EXCEPT_PATTERN, settings.plugins
+      );
+
+      if (allExceptInlinePlugins) {
+
+        if (allExceptInlinePlugins.length) {
+
+          // Keep only plugins mentioned inline and disable the rest
+          var pluginsToDisable = settings.plugins.filter(function (plugin) {
+            return allExceptInlinePlugins.indexOf(plugin) === -1;
           });
+
+          // Only set if there are plugins to disable
+          if (pluginsToDisable.length) {
+            cache[filename] = pluginsToDisable;
+          }
+
         } else {
-          // Disable all plugins
-          cache[filename] = settings.plugins;
+          // Do nothing if no plugins found, it means all plugins are enabled
         }
 
-        // Inline rule takes precedence, no need to check file pattern
+        // Return the result
         return out;
+
+      } else {
+        // Continue to next option if there is no match for this option
       }
 
-      // Save paths from the option which stands for "all plugins"
-      // These paths will be combined with paths for "real" plugins,
-      // so user could negate paths. Also filter out non-registered plugins
-      var commonPaths = settings.paths[DISABLE_ALL] || [];
-      delete settings.paths[DISABLE_ALL];
+      // -----------------------------------------------------------------------
+      // 2. Disable via inline comments
+      // -----------------------------------------------------------------------
 
-      var plugins = settings.plugins.filter(function (plugin) {
-        // Order of concat matters, now plugin paths can negate common paths
-        var paths = commonPaths.concat(settings.paths[plugin] || []);
-        var matches = multimatch(filename, paths, settings.pathsOptions);
-        // Disable plugin if it matches any path
-        return matches.length > 0;
-      });
+      var inlinePlugins = getInlinePlugins(
+        text, DISABLE_PATTERN, settings.plugins
+      );
 
-      cache[filename] = plugins;
+      if (inlinePlugins) {
+
+        // Disable all plugins if no plugins specified
+        var pluginsToDisable = inlinePlugins.length
+          ? inlinePlugins
+          : settings.plugins;
+
+        // Only set if there are plugins to disable
+        if (pluginsToDisable.length) {
+          cache[filename] = pluginsToDisable;
+        }
+
+        // Return the result
+        return out;
+
+      } else {
+        // Continue to next option if there is no match for this option
+      }
+
+      // -----------------------------------------------------------------------
+      // 3. Disable "all except" via settings
+      // -----------------------------------------------------------------------
+
+      var settingsAllExceptPlugins = getSettingsPlugins(
+        filename, settings.allExceptPaths, true,
+        settings.plugins, settings.pathsOptions
+      );
+
+      if (settingsAllExceptPlugins.length) {
+
+        // Keep only plugins matching settings paths and disable the rest
+        var pluginsToDisable = settings.plugins.filter(function (plugin) {
+          return settingsAllExceptPlugins.indexOf(plugin) === -1;
+        });
+
+        // Only set if there are plugins to disable
+        if (pluginsToDisable.length) {
+          cache[filename] = pluginsToDisable;
+        }
+
+        // Return the result
+        return out;
+
+      } else {
+        // Continue to next option if there is no match for this option
+      }
+
+      // -----------------------------------------------------------------------
+      // 4. Disable via settings
+      // -----------------------------------------------------------------------
+
+      var settingsPlugins = getSettingsPlugins(
+        filename, settings.paths, false,
+        settings.plugins, settings.pathsOptions
+      );
+
+      if (settingsPlugins.length) {
+
+        var pluginsToDisable = settingsPlugins;
+
+        // Only set if there are plugins to disable
+        if (pluginsToDisable.length) {
+          cache[filename] = pluginsToDisable;
+        }
+
+        // Return the result
+        return out;
+
+      } else {
+        // No options left, proceed to the end
+      }
 
       // ESLint requires a result to be an array of processable text blocks
       return out;
