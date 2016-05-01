@@ -15,6 +15,14 @@ function toArray(value) {
   return Array.isArray(value) ? value : [value];
 }
 
+function objValuesToArray(obj) {
+  var newObj = {};
+  Object.keys(obj).forEach(function (key) {
+    newObj[key] = toArray(obj[key]);
+  });
+  return newObj;
+}
+
 //------------------------------------------------------------------------------
 // Private
 //------------------------------------------------------------------------------
@@ -37,10 +45,10 @@ function prepare(config) {
   var settings = config.settings && config.settings[PLUGIN_NAME] || {};
 
   // Set paths, convert string values to array
-  settings.paths = settings.paths || {};
-  Object.keys(settings.paths).forEach(function (plugin) {
-    settings.paths[plugin] = toArray(settings.paths[plugin]);
-  });
+  settings.paths = objValuesToArray(settings.paths || {});
+
+  // Set allExceptPaths, convert string values to array
+  settings.allExceptPaths = objValuesToArray(settings.allExceptPaths || {});
 
   // Set options for multimatch module
   settings.pathsOptions = settings.pathsOptions || defaults.pathsOptions;
