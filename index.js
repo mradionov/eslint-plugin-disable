@@ -42,7 +42,7 @@ if (engine) {
   try {
     config = engine.getConfigForFile();
   } catch (err) {
-    console.log(err);
+    // ESLint should output this error itself
   }
 }
 
