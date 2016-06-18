@@ -1,4 +1,4 @@
-eslint-plugin-disable
+eslint-plugin-disable [![Build status](https://travis-ci.org/mradionov/eslint-plugin-disable.svg?branch=master)](https://travis-ci.org/mradionov/eslint-plugin-disable)
 ===
 
 > Disable ESLint plugins using file path patterns and inline comments
