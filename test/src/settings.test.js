@@ -144,7 +144,7 @@ test('settings: convert paths to arrays', function (t) {
   t.end();
 });
 
-test('settingsL convert allExceptPaths to arrays', function (t) {
+test('settings: convert allExceptPaths to arrays', function (t) {
   var pluginSettings = settings.prepare({
     settings: {
       'eslint-plugin-disable': {
