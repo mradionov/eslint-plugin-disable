@@ -107,9 +107,6 @@ function factory(cache, settingsGetter) {
       // Retrieve settings for current file
       var settings = settingsGetter(filePath);
 
-      // Do nothing if config failed to load (schema validation failed).
-      if (!settings) return out;
-
       // Do nothing if there is no plugins registered
       if (!settings.plugins.length) return out;
 

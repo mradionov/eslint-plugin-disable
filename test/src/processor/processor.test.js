@@ -12,21 +12,6 @@ var processor = require('../../../src/processor');
 // Tests - preprocess general
 //------------------------------------------------------------------------------
 
-test('preprocess: no config found', function (t) {
-  var cache = {};
-  var settingsGetter = function () {
-    return null;
-  };
-  var text = 'source code';
-
-  var pluginProcessor = processor.factory(cache, settingsGetter);
-  var textBlocks = pluginProcessor.preprocess(text, '/foo/1');
-
-  t.deepEqual(cache, {});
-  t.deepEqual(textBlocks, [text]);
-  t.end();
-});
-
 test('preprocess: "all except" inline stronger then "disable"', function (t) {
   // when using inline comment, "all except" option takes precedence
   // over regular disable rule, disable rule will be ignored

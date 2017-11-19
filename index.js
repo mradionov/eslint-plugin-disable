@@ -63,19 +63,8 @@ if (engine) {
       // Load ESLint config for current file (they might be different, if user
       // has config hierarchy:
       // https://eslint.org/docs/user-guide/configuring#configuration-cascading-and-hierarchy
-
-      var config = null;
-
-      // It may throw errors if schema validation fails, i.e. if one of the rules
-      // in config file has incorrect definition. Must catch it here, because
-      // otherwise ESLint will consider that plugin itself throws an error and
-      // fails to load.
-      // TODO: check if this try/catch really needed
-      try {
-        config = engine.getConfigForFile(filePath);
-      } catch (err) {
-        return null;
-      }
+      // ESLint will throw, if config has invalid schema.
+      var config = engine.getConfigForFile(filePath);
 
       // Consrtuct plugin settings for each file individually.
       var pluginSettings = settings.prepare(config);
