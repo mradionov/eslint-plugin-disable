@@ -163,7 +163,7 @@ To disable all plugins except specified ones for file paths use `allExceptPaths`
 
 Take a look at [minimatch](https://github.com/isaacs/minimatch) to learn more about file patterns available for use. To pass custom options to [minimatch](https://github.com/isaacs/minimatch), modify `pathsOptions` setting. `matchBase` option is turned on by default. These options will be applied to both *Regular disable* ([docs](#regular-disable-1)) and *Disable all except* ([docs](#disable-all-except-1)).
 
- ```js
+```js
 {
   "settings": {
     "eslint-plugin-disable": {
@@ -192,31 +192,7 @@ All the options are not merged together, it is hard to predict desired behavior 
 
 If first option applies, then only plugins mentioned in this option will be used to disable plugins, the rest of the options down the list will be ignored. If first and second options do not apply (no inline comments in file), but third option does apply, then only plugins mentioned in third option will be used to disable plugins, the rest will be ignored. And so on.
 
-#### Processed extensions
-
-Originally only `.js` and `.jsx` file extensions are processed. In order to use custom extensions, modify `extensions` setting in a config file (.eslintrc).
-
-*Note: default extensions will be overriden, to use them they also have to be mentioned*
-
-```js
-{
-  "settings": {
-    "eslint-plugin-disable": {
-      "extensions": [".js", ".ts", ".ps"]
-    }
-  }
-}
-```
-
-
 
 ## Support
 
 ESLint >= 0.16.0
-
-## Changelog
-
-- 0.3.0 - Add option to disable all plugins except specified ones
-- 0.2.1 - Prevent crash when ESLint fails to parse a source
-- 0.2.0 - Disable paths via settings in ESLint config
-- 0.1.0 - Disable particular files via inline comments
