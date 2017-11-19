@@ -52,7 +52,7 @@ function getInlinePlugins(text, pattern, availablePlugins) {
 }
 
 function getSettingsPlugins(
-  filename, pathsToMatch, ignoreStar, availablePlugins, pathsOptions
+  filePath, pathsToMatch, ignoreStar, availablePlugins, pathsOptions
 ) {
   pathsToMatch = pathsToMatch || {};
 
@@ -71,7 +71,7 @@ function getSettingsPlugins(
       ? pluginPathsToMatch
       : commonPaths.concat(pluginPathsToMatch);
 
-    var matches = multimatch(filename, paths, pathsOptions);
+    var matches = multimatch(filePath, paths, pathsOptions);
 
     // Save plugin if it matches any path
     return matches.length > 0;
@@ -86,11 +86,12 @@ function getSettingsPlugins(
 
 /**
  * Create a processor for ESLint
- * @param  {Object} settings constructed plugin settings
- * @param  {Object} cache    cache object, will be modified by reference
+ * @param  {Object}   cache     cache object, will be modified by reference
+ * @param  {Function} settings  callback, which must return plugin settings for
+ *                              particular file
  * @return {Object}          ESLint-compatible processor
  */
-function factory(settings, cache) {
+function factory(cache, settingsGetter) {
 
   return {
 
@@ -99,15 +100,18 @@ function factory(settings, cache) {
     // 2. Disable via inline comments
     // 3. Disable "all except" via settings
     // 4. Disable via settings
-    preprocess: function (text, filename) {
+    preprocess: function (text, filePath) {
       // ESLint requires a result to be an array of processable text blocks
       var out = [text];
+
+      // Retrieve settings for current file
+      var settings = settingsGetter(filePath);
 
       // Do nothing if there is no plugins registered
       if (!settings.plugins.length) return out;
 
       // Reset file options on start
-      delete cache[filename];
+      delete cache[filePath];
 
       // -----------------------------------------------------------------------
       // 1. Disable "all except" via inline comments
@@ -128,7 +132,7 @@ function factory(settings, cache) {
 
           // Only set if there are plugins to disable
           if (pluginsToDisable.length) {
-            cache[filename] = pluginsToDisable;
+            cache[filePath] = pluginsToDisable;
           }
 
         } else {
@@ -159,7 +163,7 @@ function factory(settings, cache) {
 
         // Only set if there are plugins to disable
         if (pluginsToDisable.length) {
-          cache[filename] = pluginsToDisable;
+          cache[filePath] = pluginsToDisable;
         }
 
         // Return the result
@@ -174,7 +178,7 @@ function factory(settings, cache) {
       // -----------------------------------------------------------------------
 
       var settingsAllExceptPlugins = getSettingsPlugins(
-        filename, settings.allExceptPaths, true,
+        filePath, settings.allExceptPaths, true,
         settings.plugins, settings.pathsOptions
       );
 
@@ -187,7 +191,7 @@ function factory(settings, cache) {
 
         // Only set if there are plugins to disable
         if (pluginsToDisable.length) {
-          cache[filename] = pluginsToDisable;
+          cache[filePath] = pluginsToDisable;
         }
 
         // Return the result
@@ -202,7 +206,7 @@ function factory(settings, cache) {
       // -----------------------------------------------------------------------
 
       var settingsPlugins = getSettingsPlugins(
-        filename, settings.paths, false,
+        filePath, settings.paths, false,
         settings.plugins, settings.pathsOptions
       );
 
@@ -212,7 +216,7 @@ function factory(settings, cache) {
 
         // Only set if there are plugins to disable
         if (pluginsToDisable.length) {
-          cache[filename] = pluginsToDisable;
+          cache[filePath] = pluginsToDisable;
         }
 
         // Return the result
@@ -226,9 +230,9 @@ function factory(settings, cache) {
       return out;
     },
 
-    postprocess: function (messages, filename) {
+    postprocess: function (messages, filePath) {
       // No need to postprocess, if file was not preprocessed (has no rule)
-      if (!cache[filename]) {
+      if (!cache[filePath]) {
         // ESLint matches messages to text blocks returned from preprocess
         // by using the same array index
         return messages[0];
@@ -242,13 +246,13 @@ function factory(settings, cache) {
         // Plugin rules are prefixed with plugin name: "plugin/some-rule"
         var parts = message.ruleId.split('/');
         var isRemovable = (parts.length === 2 &&
-                          cache[filename].indexOf(parts[0]) > -1);
+                          cache[filePath].indexOf(parts[0]) > -1);
 
         // Return "false" to remove a message
         return !isRemovable;
       });
       // Remove cache for file, no need to store it
-      delete cache[filename];
+      delete cache[filePath];
       return out;
     }
 

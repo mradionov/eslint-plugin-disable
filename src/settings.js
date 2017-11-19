@@ -29,7 +29,6 @@ function objValuesToArray(obj) {
 
 // Default settings
 var defaults = {
-  extensions: ['.js', '.jsx'],
   pathsOptions: {
     matchBase: true
   }
@@ -52,9 +51,6 @@ function prepare(config) {
 
   // Set options for multimatch module
   settings.pathsOptions = settings.pathsOptions || defaults.pathsOptions;
-
-  // Extensions, let user override defaults
-  settings.extensions = toArray(settings.extensions || defaults.extensions);
 
   // Forward plugins from config or use custom ones, remove current plugin
   settings.plugins = toArray(settings.plugins || config.plugins || []);

@@ -8,57 +8,69 @@ var resolve = require('resolve');
 
 var settings = require('./src/settings');
 var processor = require('./src/processor');
+var translateOptions = require('./src/translateOptions');
 
 //------------------------------------------------------------------------------
 // Private
 //------------------------------------------------------------------------------
 
-// ESLint does not pass config object to processors
-// Locate and use current user config manually
-// Find ESLint installation used in current working directory
-var eslintPath = resolve.sync('eslint', { basedir: process.cwd() });
+var workingDirectoryPath = process.cwd();
+var resolveOptions = {
+  basedir: workingDirectoryPath,
+};
 
-// Load ESLint CLI API to fetch constructed config for current working directory
-var engine = null;
-var config = null;
-var processors = {};
+// ESLint does not pass config object to processors.
+// Locate and use ESLint engine to be able to load ESLint config for particular
+// files.
+// Find ESLint installation used in current working directory
+var eslintPath = resolve.sync('eslint', resolveOptions);
+var eslintOptionsPath = resolve.sync('eslint/lib/options', resolveOptions);
 
 var eslint = require(eslintPath);
+var eslintOptions = require(eslintOptionsPath);
+
+var cliArgs = process.argv;
+
+var engine = null;
 
 // Extra guard if engine fails to load. Must catch it here, because
 // otherwise ESLint will consider that plugin itself throws an error and
 // fails to load.
+// Options also might throw an error in case some of them are incorrect.
 try {
-  engine = new eslint.CLIEngine();
+  var options = eslintOptions.parse(cliArgs);
+  engine = new eslint.CLIEngine(translateOptions(options));
 } catch (err) {
-  console.log(err);
+  console.error('[eslint-plugin-disable]', err);
 }
 
-// It may throw errors if schema validation fails, i.e. if one of the rules
-// in config file has incorrect definition. Must catch it here, because
-// otherwise ESLint will consider that plugin itself throws an error and
-// fails to load.
+var processors = {};
+
+// Register processors only if ESLint engine was successfully loaded
 if (engine) {
-  try {
-    config = engine.getConfigForFile();
-  } catch (err) {
-    // ESLint should output this error itself
-  }
-}
 
-// Register processors only if ESLint config was successfully loaded
-if (config) {
-
-  // Prepare settings for processors
-  var pluginSettings = settings.prepare(config);
+  // Extensions are configured via ESLint CLI --ext option. Make processor
+  // work with all file extensions user wants to use.
+  var extensions = engine.options.extensions;
 
   // Store informaton about what plugins to disable for particular files
   var cache = {};
 
   // Process only files with specified extensions
-  pluginSettings.extensions.forEach(function (ext) {
+  extensions.forEach(function (ext) {
     // Re-use the same cache for all processors, it will be modified by reference
-    processors[ext] = processor.factory(pluginSettings, cache);
+    processors[ext] = processor.factory(cache, function settingsGetter(filePath) {
+      // Load ESLint config for current file (they might be different, if user
+      // has config hierarchy:
+      // https://eslint.org/docs/user-guide/configuring#configuration-cascading-and-hierarchy
+      // ESLint will throw, if config has invalid schema.
+      var config = engine.getConfigForFile(filePath);
+
+      // Consrtuct plugin settings for each file individually.
+      var pluginSettings = settings.prepare(config);
+
+      return pluginSettings;
+    });
   });
 
 }
