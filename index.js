@@ -19,29 +19,58 @@ var resolveOptions = {
   basedir: workingDirectoryPath,
 };
 
+function resolveEslint(path) {
+  // First try to locate a path on behalf of current working directory to find
+  // a local eslint installation. If it fails to find a local installation, it
+  // goes through the rest of node paths to find a package.
+  // "resolve" might not be able to find global modules on Windows,
+  // (https://github.com/mradionov/eslint-plugin-disable/issues/12),
+  // because it originally does not look in a folder with global modules.
+  // Try using Node.js "require.resolve" to find the global installation.
+  try {
+    return resolve.sync(path, resolveOptions);
+  } catch (err) {
+    // Ignore error, try using Node.js require.resolve instead.
+  }
+  try {
+    return require.resolve(path);
+  } catch (err) {
+    throw err;
+  }
+}
+
 // ESLint does not pass config object to processors.
 // Locate and use ESLint engine to be able to load ESLint config for particular
 // files.
-// Find ESLint installation used in current working directory
-var eslintPath = resolve.sync('eslint', resolveOptions);
-var eslintOptionsPath = resolve.sync('eslint/lib/options', resolveOptions);
 
-var eslint = require(eslintPath);
-var eslintOptions = require(eslintOptionsPath);
+var eslint = null;
+var eslintOptions = null;
 
-var cliArgs = process.argv;
+try {
+  var eslintPath = resolveEslint('eslint', resolveOptions);
+  var eslintOptionsPath = resolveEslint('eslint/lib/options', resolveOptions);
+
+  eslint = require(eslintPath);
+  eslintOptions = require(eslintOptionsPath);
+} catch (err) {
+  console.error('[eslint-plugin-disable]', err);
+}
 
 var engine = null;
 
-// Extra guard if engine fails to load. Must catch it here, because
-// otherwise ESLint will consider that plugin itself throws an error and
-// fails to load.
-// Options also might throw an error in case some of them are incorrect.
-try {
-  var options = eslintOptions.parse(cliArgs);
-  engine = new eslint.CLIEngine(translateOptions(options));
-} catch (err) {
-  console.error('[eslint-plugin-disable]', err);
+if (eslint && eslintOptions) {
+
+  // Extra guard if engine fails to load. Must catch it here, because
+  // otherwise ESLint will consider that plugin itself throws an error and
+  // fails to load.
+  // Options also might throw an error in case some of them are incorrect.
+  try {
+    var cliArgs = process.argv;
+    var options = eslintOptions.parse(cliArgs);
+    engine = new eslint.CLIEngine(translateOptions(options));
+  } catch (err) {
+    console.error('[eslint-plugin-disable]', err);
+  }
 }
 
 var processors = {};
