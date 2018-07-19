@@ -95,6 +95,11 @@ function factory(cache, settingsGetter) {
 
   return {
 
+    // When ESLint is used with --fix flag, make sure that plugin does not
+    // block autofixing.
+    // Fixable plugin rules, which are disabled, won't be fixed.
+    supportsAutofix: true,
+
     // Options are not combined, but executed separately in this order:
     // 1. Disable "all except" via inline comments
     // 2. Disable via inline comments
