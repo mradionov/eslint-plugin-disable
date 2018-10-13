@@ -8,7 +8,6 @@ var resolve = require('resolve');
 
 var settings = require('./src/settings');
 var processor = require('./src/processor');
-var translateOptions = require('./src/translateOptions');
 
 //------------------------------------------------------------------------------
 // Private
@@ -57,6 +56,7 @@ try {
 }
 
 var engine = null;
+var options = null;
 
 if (eslint && eslintOptions) {
 
@@ -66,8 +66,8 @@ if (eslint && eslintOptions) {
   // Options also might throw an error in case some of them are incorrect.
   try {
     var cliArgs = process.argv;
-    var options = eslintOptions.parse(cliArgs);
-    engine = new eslint.CLIEngine(translateOptions(options));
+    options = eslintOptions.parse(cliArgs);
+    engine = new eslint.CLIEngine();
   } catch (err) {
     console.error('[eslint-plugin-disable]', err);
   }
@@ -80,7 +80,7 @@ if (engine) {
 
   // Extensions are configured via ESLint CLI --ext option. Make processor
   // work with all file extensions user wants to use.
-  var extensions = engine.options.extensions;
+  var extensions = options.ext;
 
   // Store informaton about what plugins to disable for particular files
   var cache = {};
