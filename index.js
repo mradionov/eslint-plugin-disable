@@ -4,6 +4,8 @@
 // Requirements
 //------------------------------------------------------------------------------
 
+var path = require('path');
+
 var resolve = require('resolve');
 
 var settings = require('./src/settings');
@@ -65,7 +67,21 @@ if (eslint && eslintOptions) {
   // fails to load.
   // Options also might throw an error in case some of them are incorrect.
   try {
+    // Check if ESLint is used via ESLint Node.js API. If it is, then ignore
+    // any command line arguments, because they might not be related to ESLint
+    // at all. For example, Vue cli-service wraps ESLint and runs it as a part
+    // of build process, all arguments and configs are predefined and can not
+    // be retrieved from here. In this case we simply ignore all the args
+    // because they belong to some other binary which in turn uses ESLint
+    // via it's Node.js API. Only use the args if we are actually using ESLint
+    // via it's binary.
     var cliArgs = process.argv;
+    var executedFilePath = cliArgs[1] || '';
+    var isESLintBinary = executedFilePath.endsWith(path.join('.bin', 'eslint'));
+    if (!isESLintBinary) {
+      cliArgs = [];
+    }
+
     options = eslintOptions.parse(cliArgs);
     engine = new eslint.CLIEngine();
   } catch (err) {
