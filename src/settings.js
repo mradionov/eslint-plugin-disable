@@ -1,11 +1,6 @@
 'use strict';
 
-//------------------------------------------------------------------------------
-// Constants
-//------------------------------------------------------------------------------
-
-var PLUGIN_NAME = 'eslint-plugin-disable';
-var PLUGIN_NAME_SHORT = 'disable';
+var constants = require('./constants');
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -41,7 +36,7 @@ var defaults = {
  */
 function prepare(config) {
   config = config || {};
-  var settings = config.settings && config.settings[PLUGIN_NAME] || {};
+  var settings = config.settings && config.settings[constants.PLUGIN_NAME] || {};
 
   // Set paths, convert string values to array
   settings.paths = objValuesToArray(settings.paths || {});
@@ -54,10 +49,12 @@ function prepare(config) {
 
   // Forward plugins from config or use custom ones, remove current plugin
   settings.plugins = toArray(settings.plugins || config.plugins || []);
-  var index = settings.plugins.indexOf(PLUGIN_NAME_SHORT);
+  var index = settings.plugins.indexOf(constants.PLUGIN_NAME_SHORT);
   if (index > -1) {
     settings.plugins.splice(index, 1);
   }
+
+  settings.cliArgs = settings.cliArgs || [];
 
   return settings;
 }

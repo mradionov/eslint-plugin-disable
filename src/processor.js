@@ -91,7 +91,7 @@ function getSettingsPlugins(
  *                              particular file
  * @return {Object}          ESLint-compatible processor
  */
-function factory(cache, settingsGetter) {
+function factory(cache, settingsGetter, externalProcessor = null) {
 
   return {
 
@@ -106,8 +106,13 @@ function factory(cache, settingsGetter) {
     // 3. Disable "all except" via settings
     // 4. Disable via settings
     preprocess: function (text, filePath) {
+
       // ESLint requires a result to be an array of processable text blocks
       var out = [text];
+
+      if (externalProcessor !== null) {
+        out = externalProcessor.preprocess(text, filePath);
+      }
 
       // Retrieve settings for current file
       var settings = settingsGetter(filePath);
@@ -238,10 +243,16 @@ function factory(cache, settingsGetter) {
     postprocess: function (messages, filePath) {
       // No need to postprocess, if file was not preprocessed (has no rule)
       if (!cache[filePath]) {
-        // ESLint matches messages to text blocks returned from preprocess
-        // by using the same array index
-        return messages[0];
+
+        if (externalProcessor === null) {
+          // ESLint matches messages to text blocks returned from preprocess
+          // by using the same array index
+          return messages[0];
+        }
+
+        return externalProcessor.postprocess(messages, filePath);
       }
+
       // Remove all disabled plugin messages
       // Return "true" to keep message for rule, "false" - to remove
       var out = messages[0].filter(function (message) {
@@ -256,9 +267,15 @@ function factory(cache, settingsGetter) {
         // Return "false" to remove a message
         return !isRemovable;
       });
+
       // Remove cache for file, no need to store it
       delete cache[filePath];
-      return out;
+
+      if (externalProcessor === null) {
+        return out;
+      }
+
+      return externalProcessor.postprocess([out]);
     }
 
   };

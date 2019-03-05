@@ -18,6 +18,7 @@ test('settings: default settings for falsy config', function (t) {
   t.deepEqual(pluginSettings.allExceptPaths, {});
   t.deepEqual(pluginSettings.pathsOptions, settings.defaults.pathsOptions);
   t.deepEqual(pluginSettings.plugins, []);
+  t.deepEqual(pluginSettings.cliArgs, []);
   t.end();
 });
 
@@ -28,6 +29,7 @@ test('settings: default settings for undefined settings', function (t) {
   t.deepEqual(pluginSettings.allExceptPaths, {});
   t.deepEqual(pluginSettings.pathsOptions, settings.defaults.pathsOptions);
   t.deepEqual(pluginSettings.plugins, []);
+  t.deepEqual(pluginSettings.cliArgs, []);
   t.end();
 });
 
@@ -39,6 +41,7 @@ test('settings: default settings for undefined plugin settings', function (t) {
   t.deepEqual(pluginSettings.allExceptPaths, {});
   t.deepEqual(pluginSettings.pathsOptions, settings.defaults.pathsOptions);
   t.deepEqual(pluginSettings.plugins, []);
+  t.deepEqual(pluginSettings.cliArgs, []);
   t.end();
 });
 
@@ -52,6 +55,7 @@ test('settings: default settings for empty plugin settings', function (t) {
   t.deepEqual(pluginSettings.allExceptPaths, {});
   t.deepEqual(pluginSettings.pathsOptions, settings.defaults.pathsOptions);
   t.deepEqual(pluginSettings.plugins, []);
+  t.deepEqual(pluginSettings.cliArgs, []);
   t.end();
 });
 
