@@ -113,7 +113,7 @@ function greet(name) {
 
 To disable plugins for file paths use `paths` option in config settings (.eslintrc). It is an object, where key is a name of the plugin to disable, and value is an array of patterns to match against file name. To target all plugins use `*` as a key. Make sure to start paths with `**`, because match is done against absolute path to a file.
 
-```js
+```json
 {
   "settings": {
     "eslint-plugin-disable": {
@@ -129,7 +129,7 @@ To disable plugins for file paths use `paths` option in config settings (.eslint
 
 To disable everything but particular folder you can use path negation.
 
-```js
+```json
 {
   "settings": {
     "eslint-plugin-disable": {
@@ -146,7 +146,7 @@ To disable everything but particular folder you can use path negation.
 
 To disable all plugins except specified ones for file paths use `allExceptPaths` option in config settings (.eslintrc). It is an object, where key is a name of the plugin to keep (all other plugins will be disabled), and value is an array of patterns to match against file name. For this case `*` does no really make sence in comparison with *Regular disable* ([see above](#regular-disable-1)), so it will be ignored. Make sure to start paths with `**`, because match is done against absolute path to a file.
 
-```js
+```json
 {
   "settings": {
     "eslint-plugin-disable": {
@@ -163,7 +163,7 @@ To disable all plugins except specified ones for file paths use `allExceptPaths`
 
 Take a look at [minimatch](https://github.com/isaacs/minimatch) to learn more about file patterns available for use. To pass custom options to [minimatch](https://github.com/isaacs/minimatch), modify `pathsOptions` setting. `matchBase` option is turned on by default. These options will be applied to both *Regular disable* ([docs](#regular-disable-1)) and *Disable all except* ([docs](#disable-all-except-1)).
 
-```js
+```json
 {
   "settings": {
     "eslint-plugin-disable": {
@@ -180,6 +180,23 @@ Take a look at [minimatch](https://github.com/isaacs/minimatch) to learn more ab
 ```
 
 *Note: Because ESLint uses absolute paths and it is difficult to correctly locate base path of your project from within a plugin, so it is highly suggested to use complete paths to folders you want to disable to leverage the risk of targeting wrong directories and files.*
+
+##### CLI args
+
+Sometimes third-party ESLint plugins make use of ESLint Node.js API and execute ESLint directly (like `vue-cli-service`). They might predefine file extensions in options passed directly to ESLint engine (`--ext` flag). The plugin is unable to intercept these kind of cases, therefore it requires manual setting of CLI parameters for extensions if there are any unusual ones.
+
+```json
+{
+  "settings": {
+    "eslint-plugin-disable": {
+      "paths": {
+        "vue": ["**/lib/**/*.vue"]
+      },
+      "cliArgs": ["--ext", ".js,.vue"]
+    }
+  }
+}
+```
 
 ## Option precedence
 
