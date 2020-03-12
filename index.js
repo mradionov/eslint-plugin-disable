@@ -6,7 +6,7 @@
 
 var path = require('path');
 
-var resolve = require('resolve');
+const ModuleLoader = require('./src/ModuleLoader');
 
 var constants = require('./src/constants');
 var settings = require('./src/settings');
@@ -20,26 +20,7 @@ var workingDirectoryPath = process.cwd();
 var resolveOptions = {
   basedir: workingDirectoryPath,
 };
-
-function resolveEslint(path) {
-  // First try to locate a path on behalf of current working directory to find
-  // a local eslint installation. If it fails to find a local installation, it
-  // goes through the rest of node paths to find a package.
-  // "resolve" might not be able to find global modules on Windows,
-  // (https://github.com/mradionov/eslint-plugin-disable/issues/12),
-  // because it originally does not look in a folder with global modules.
-  // Try using Node.js "require.resolve" to find the global installation.
-  try {
-    return resolve.sync(path, resolveOptions);
-  } catch (err) {
-    // Ignore error, try using Node.js require.resolve instead.
-  }
-  try {
-    return require.resolve(path);
-  } catch (err) {
-    throw err;
-  }
-}
+const moduleLoader = new ModuleLoader(resolveOptions);
 
 function logError(err) {
   console.error('[eslint-plugin-disable]', err);
@@ -52,12 +33,10 @@ function logError(err) {
 var eslint = null;
 
 try {
-  var eslintPath = resolveEslint('eslint', resolveOptions);
-  eslint = require(eslintPath);
+  eslint = moduleLoader.require('eslint');
 } catch (err) {
   logError(err);
 }
-
 
 var engine = null;
 
@@ -97,8 +76,7 @@ var eslintOptions = null;
 
 if (rootConfig) {
   try {
-    var eslintOptionsPath = resolveEslint('eslint/lib/options', resolveOptions);
-    eslintOptions = require(eslintOptionsPath);
+    eslintOptions = moduleLoader.require('eslint/lib/options');
   } catch (err) {
     logError(err);
   }
