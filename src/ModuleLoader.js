@@ -1,23 +1,13 @@
-'use strict';
+const resolve = require('resolve');
 
-//------------------------------------------------------------------------------
-// Requirements
-//------------------------------------------------------------------------------
-
-var resolve = require('resolve');
-
-var PluginError = require('./PluginError');
-
-//------------------------------------------------------------------------------
-// Private
-//------------------------------------------------------------------------------
+const PluginError = require('./PluginError');
 
 function ModuleLoader(options) {
   // Options are passed directly to "resolve" module
   this.options = options;
 }
 
-ModuleLoader.prototype.require = function (path) {
+ModuleLoader.prototype.load = function(path) {
   const resolvedPath = this.resolve(path);
   try {
     const loadedModule = require(resolvedPath);
@@ -25,9 +15,9 @@ ModuleLoader.prototype.require = function (path) {
   } catch (err) {
     throw new PluginError(PluginError.TYPE_MODULE_REQUIRE, err);
   }
-}
+};
 
-ModuleLoader.prototype.resolve = function (path) {
+ModuleLoader.prototype.resolve = function(path) {
   // First try to locate a path on behalf of current working directory to find
   // a local eslint installation. If it fails to find a local installation, it
   // goes through the rest of node paths to find a package.
@@ -45,6 +35,6 @@ ModuleLoader.prototype.resolve = function (path) {
   } catch (err) {
     throw new PluginError(PluginError.TYPE_MODULE_RESOLVE, err);
   }
-}
+};
 
 module.exports = ModuleLoader;

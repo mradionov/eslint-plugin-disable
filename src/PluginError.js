@@ -1,14 +1,4 @@
-'use strict';
-
-//------------------------------------------------------------------------------
-// Requirements
-//------------------------------------------------------------------------------
-
-var constants = require('./constants');
-
-//------------------------------------------------------------------------------
-// Private
-//------------------------------------------------------------------------------
+const constants = require('./constants');
 
 function PluginError(type, originalError) {
   // you can pass original error object, if re-throwing to keep it's info
@@ -27,9 +17,6 @@ PluginError.prototype.constructor = PluginError;
 
 PluginError.TYPE_MODULE_RESOLVE = 'MODULE_RESOLVE';
 PluginError.TYPE_MODULE_REQUIRE = 'MODULE_REQUIRE';
-
-//------------------------------------------------------------------------------
-// Public Interface
-//------------------------------------------------------------------------------
+PluginError.TYPE_ENGINE_CREATE = 'ENGINE_CREATE';
 
 module.exports = PluginError;
