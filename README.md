@@ -1,9 +1,10 @@
-eslint-plugin-disable [![Build status](https://travis-ci.org/mradionov/eslint-plugin-disable.svg?branch=master)](https://travis-ci.org/mradionov/eslint-plugin-disable)
-===
+# eslint-plugin-disable [![Build status](https://travis-ci.org/mradionov/eslint-plugin-disable.svg?branch=master)](https://travis-ci.org/mradionov/eslint-plugin-disable)
 
 > Disable ESLint plugins using file path patterns and inline comments
 
-- Inline comments:
+..which means all disabled plugins' errors and warnings won't appear in ESLint report.
+
+- Example: inline comments:
 
   ```js
   /* eslint-plugin-disable angular */
@@ -13,27 +14,19 @@ eslint-plugin-disable [![Build status](https://travis-ci.org/mradionov/eslint-pl
   }
   ```
 
-- File path patterns (.eslintrc):
+- Example: file path patterns (.eslintrc):
 
-  ```js
+  ```json
   {
-    "settings": {
-      "eslint-plugin-disable": {
-        "paths": {
-          "angular": ["**/lib/**/*.js"]
-        }
+    "plugins": ["react", "disable"],
+    "override": [
+      {
+        "files": ["tests/**/*.test.js"],
+        "processor": "disable/disable"
       }
-    }
+    ]
   }
   ```
-
-## Origin
-
-The goal is to add an ability of entirely disabling ESLint plugins for particular JS files via inline comments. Unfortunately this feature is not natively supported in ESLint yet, so this module may become a temporary workaround. Read the following issues for additional information:
-
-- [eslint/eslint - Disable plugin with comments #2118](https://github.com/eslint/eslint/issues/2118)
-- [eslint/eslint - Provide means for disabling all rules from a given plugin within a file #3419](https://github.com/eslint/eslint/issues/3419)
-- [Gillespie59/eslint-plugin-angular - Don't lint non-angular files #228](https://github.com/Gillespie59/eslint-plugin-angular/issues/228)
 
 ## Install
 
@@ -43,15 +36,17 @@ npm install eslint-plugin-disable --save-dev
 
 ## Use
 
-Add plugin to a config file (.eslintrc):
+Add plugin to a config file (.eslintrc) and make it default processor:
 
-```js
+```diff
 {
   "plugins": [
-    "angular",
-    "disable",  // <--
-    "react"
-  ]
+    "react",
+    "import"
+    "jsx-a11y",
++   "disable"
+  ],
++ "processor": "disable/disable"
 }
 ```
 
@@ -59,10 +54,10 @@ Add plugin to a config file (.eslintrc):
 
 ##### Regular disable
 
-Plugin adds a custom option to use in files in a form of inline comment, which allows to disable entire plugins for this file. Plugin names have to be the same as in ESLint config file, separated by comma:
+Plugin adds a custom directive to use in files in a form of inline comment, which allows to disable entire plugins for this file. Plugin names have to be the same as in ESLint config file, separated by comma:
 
 ```js
-/* eslint-plugin-disable angular, react */
+/* eslint-plugin-disable react, jsx-a11y */
 
 function greet(name) {
   console.log('Hi, ' + name);
@@ -81,126 +76,129 @@ function greet(name) {
 
 ##### Disable all except
 
-Another custom option allows to disable all plugins except ones that are specified. It might be useful when there are a lot of plugins in the project and it is required to use one-two of them for particular files, usage of regular disable syntax might be more difficult to maintain if there are plans to add new plugins to the project. Plugin names have to be the same as in ESLint config file, separated by comma:
+Another custom option allows to disable all plugins except ones that are specified. It might be useful when there are a lot of plugins in the project and it is required to use one or two of them for particular files, usage of regular disable syntax might be cumbersome to maintain if there are plans to add new plugins to the project. Plugin names have to be the same as in ESLint config file, separated by comma:
 
 ```js
-/* eslint-plugin-disable-all-except angular, react */
+/* eslint-plugin-disable-all-except react, jsx-a11y */
 
 function greet(name) {
   console.log('Hi, ' + name);
 }
 ```
 
-If no any plugins provided - **none** of the plugins listed in ESLint config will be disabled i.e. error messages will be the same as if this options was not added at all:
+_Notes_:
 
-```js
-/* eslint-plugin-disable-all-except */
-
-function greet(name) {
-  console.log('Hi, ' + name);
-}
-```
-
-*Notes*:
-
- - whitespace inside option block comment is ignored
- - original file is not modified
- - there is no way to restore behavior with another inline option
+- disable all except: if no plugins specified, then **none** of the plugins listed in ESLint config will be disabled i.e. error messages will not be removed from ESLint report
+- all target files must have a _"disable/disable"_ processor enabled for them, including if you are using [ESLint 6 Overrides](https://eslint.org/docs/user-guide/configuring#specifying-processor) or not
+- whitespace inside option block comment is ignored
+- original file is not modified
+- there is no way to restore behavior with another inline option
 
 #### File paths
 
 ##### Regular disable
 
-To disable plugins for file paths use `paths` option in config settings (.eslintrc). It is an object, where key is a name of the plugin to disable, and value is an array of patterns to match against file name. To target all plugins use `*` as a key. Make sure to start paths with `**`, because match is done against absolute path to a file.
+To disable plugins for file paths use new [ESLint 6+ Overrides](https://eslint.org/docs/user-guide/configuring) feature in config (.eslintrc). It has many different configurations for glob path patterns, ignore patterns and it basically creates a nested config for a list of files ([ESLint docs for more info](https://eslint.org/docs/user-guide/configuring#configuration-based-on-glob-patterns)). This list of files should be assigned with a _"disable/disable"_ processor in order for plugin to work. You can have multiple _"overrides"_ entries with different paths and different plugins to disable.
 
-```json
+The following config will:
+
+- disable _"import"_ and _"jsx-a11y"_ plugins for all files matching _"tests/\*\*/\*.test.js"_ glob pattern
+- disable _"react"_ plugin for all files matching _"lib/\*.js"_ glob pattern
+
+```diff
 {
-  "settings": {
-    "eslint-plugin-disable": {
-      "paths": {
-        "angular": ["**/lib/**/*.js"],
-        "react": ["**/app/module/*.service.js", "**/*.test.jsx"],
-        "*": ["config.js"]
-      }
-    }
-  }
+  "plugins": ["import", "react", "jsx-a11y", "disable"],
+  "processor": "disable/disable",
++ "overrides": [
++   {
++     "files": ["tests/**/*.test.js"],
++     "settings": {
++       "disable/plugins": ["import", "jsx-a11y"]
++     }
++   },
++   {
++     "files": ["lib/*.js"],
++     "settings": {
++       "disable/plugins": ["react"]
++     }
++   }
++ ]
 }
 ```
 
-To disable everything but particular folder you can use path negation.
+To disable all registered plugins you can simply skip _"settings"_ at all or use a star:
 
-```json
+```diff
 {
-  "settings": {
-    "eslint-plugin-disable": {
-      "paths": {
-        "*": ["*"],
-        "angular": ["!**/app/**/*.js"]
+  "plugins": ["import", "react", "jsx-a11y", "disable"],
+  "processor": "disable/disable",
+  "overrides": [
+    {
+      "files": ["tests/**/*.test.js"],
+      "settings": {
++       "disable/plugins": "*"
       }
     }
-  }
+  ]
 }
 ```
 
 ##### Disable all except
 
-To disable all plugins except specified ones for file paths use `allExceptPaths` option in config settings (.eslintrc). It is an object, where key is a name of the plugin to keep (all other plugins will be disabled), and value is an array of patterns to match against file name. For this case `*` does no really make sence in comparison with *Regular disable* ([see above](#regular-disable-1)), so it will be ignored. Make sure to start paths with `**`, because match is done against absolute path to a file.
+To disable all plugins except specified ones use `disableAllExcept` flag config settings (.eslintrc).
 
-```json
+The following config will disable all registered plugins except _"react"_ for all files mathing _"files"_ glob pattern:
+
+```diff
 {
-  "settings": {
-    "eslint-plugin-disable": {
-      "allExceptPaths": {
-        "angular": ["**/lib/**/*.js"],
-        "react": ["**/app/module/*.service.js", "**/*.test.jsx"]
+  "plugins": ["import", "react", "jsx-a11y", "disable"],
+  "processor": "disable/disable",
+  "overrides": [
+    {
+      "files": ["tests/**/*.test.js"],
+      "settings": {
++       "disable/disableAllExcept": true,
++       "disable/plugins": ["react"]
       }
     }
+  ]
+}
+```
+
+## Conflicts with other plugins
+
+Some ESLint plugins also use processors, which creates a conflict with this plugin, because ESLint does not allow to chain processors for the same source files without processing it and producing another files. There is a setting _"externalProcessor"_, which accepts a processor identifier _"pluginName/processorName"_ and makes this plugin to call other plugin's processor before disabling the rules.
+
+One of the cases is _"eslint-plugin-vue"_:
+
+```diff
+{
+  "plugins": ["vue", "disable"],
+  "processor": "disable/disable",
+  "settings": {
+    "disable/plugins": ["vue"],
++   "disable/externalProcessor": "vue/.vue"
   }
 }
 ```
 
-##### Paths
+As a plugin might export multiple processors, the only way to find out what _"processorName"_ to use, is to browse plugin's sources. If you don't know it, then you can just skip _"processorName"_ in identifier and only leave _"pluginName"_ - this way first available processor will be auto-picked.
 
-Take a look at [minimatch](https://github.com/isaacs/minimatch) to learn more about file patterns available for use. To pass custom options to [minimatch](https://github.com/isaacs/minimatch), modify `pathsOptions` setting. `matchBase` option is turned on by default. These options will be applied to both *Regular disable* ([docs](#regular-disable-1)) and *Disable all except* ([docs](#disable-all-except-1)).
-
-```json
+```diff
 {
+  "plugins": ["vue", "disable"],
+  "processor": "disable/disable",
   "settings": {
-    "eslint-plugin-disable": {
-      "paths": {
-        "angular": ["**/lib/**/*.js"]
-      },
-      "pathsOptions": {
-        "matchBase": false,
-        "noglobstar": true
-      }
-    }
-  }
-}
-```
-
-*Note: Because ESLint uses absolute paths and it is difficult to correctly locate base path of your project from within a plugin, so it is highly suggested to use complete paths to folders you want to disable to leverage the risk of targeting wrong directories and files.*
-
-##### CLI args
-
-Sometimes third-party ESLint plugins make use of ESLint Node.js API and execute ESLint directly (like `vue-cli-service`). They might predefine file extensions in options passed directly to ESLint engine (`--ext` flag). The plugin is unable to intercept these kind of cases, therefore it requires manual setting of CLI parameters for extensions if there are any unusual ones.
-
-```json
-{
-  "settings": {
-    "eslint-plugin-disable": {
-      "paths": {
-        "vue": ["**/lib/**/*.vue"]
-      },
-      "cliArgs": ["--ext", ".js,.vue"]
-    }
+    "disable/plugins": ["vue"],
++   "disable/externalProcessor": "vue"
+-   "disable/externalProcessor": "vue/.vue
   }
 }
 ```
 
 ## Option precedence
 
-All the options are not merged together, it is hard to predict desired behavior and solve all conflicts between file paths and specified plugins, so there is a strict order in which they apply:
+All the options are not merged together, there is a strict order in which they apply:
 
 1. Inline comment to disable all plugins except specified ([docs](#disable-all-except))
 2. Inline comment to disable specified plugins ([docs](#regular-disable))
@@ -209,7 +207,21 @@ All the options are not merged together, it is hard to predict desired behavior 
 
 If first option applies, then only plugins mentioned in this option will be used to disable plugins, the rest of the options down the list will be ignored. If first and second options do not apply (no inline comments in file), but third option does apply, then only plugins mentioned in third option will be used to disable plugins, the rest will be ignored. And so on.
 
-
 ## Support
 
-ESLint >= 0.16.0
+| eslint           | eslint-plugin-disable |
+| ---------------- | --------------------- |
+| >= 0.16.0 <6.0.0 | <=1.0.5               |
+| >=6.0.0          | >=2.0.0               |
+
+## Migrating
+
+- [1.x to 2.x](MIGRATING.md)
+
+## Origin
+
+Unfortunately this feature is not natively supported in ESLint yet, so this module may become a temporary workaround. Read the following issues for additional information:
+
+- [eslint/eslint - Disable plugin with comments #2118](https://github.com/eslint/eslint/issues/2118)
+- [eslint/eslint - Provide means for disabling all rules from a given plugin within a file #3419](https://github.com/eslint/eslint/issues/3419)
+- [Gillespie59/eslint-plugin-angular - Don't lint non-angular files #228](https://github.com/Gillespie59/eslint-plugin-angular/issues/228)
