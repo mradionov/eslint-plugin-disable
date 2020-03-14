@@ -44,9 +44,7 @@ test('FileSettings: settings plugins dont overlap with registered plugins', func
   const config = {
     plugins: ['foo', 'disable', 'bar'],
     settings: {
-      'eslint-plugin-disable': {
-        plugins: ['baz', 'qux', 'disable'],
-      },
+      'disable/plugins': ['baz', 'qux', 'disable'],
     },
   };
   const settings = new FileSettings(config);
@@ -64,9 +62,7 @@ test('FileSettings: settings plugins star stays', function(t) {
   const config = {
     plugins: ['foo', 'disable', 'bar'],
     settings: {
-      'eslint-plugin-disable': {
-        plugins: ['*'],
-      },
+      'disable/plugins': ['*'],
     },
   };
   const settings = new FileSettings(config);
@@ -84,9 +80,7 @@ test('FileSettings: settings plugins string', function(t) {
   const config = {
     plugins: ['foo', 'disable', 'bar'],
     settings: {
-      'eslint-plugin-disable': {
-        plugins: 'foo',
-      },
+      'disable/plugins': 'foo',
     },
   };
   const settings = new FileSettings(config);
@@ -104,10 +98,8 @@ test('FileSettings: settings external processor passthru', function(t) {
   const config = {
     plugins: ['foo', 'disable', 'bar'],
     settings: {
-      'eslint-plugin-disable': {
-        plugins: 'foo',
-        externalProcessor: 'qux/qux',
-      },
+      'disable/plugins': 'foo',
+      'disable/externalProcessor': 'qux/qux',
     },
   };
   const settings = new FileSettings(config);

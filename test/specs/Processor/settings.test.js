@@ -9,9 +9,7 @@ test('Processor: settings all plugins', function(t) {
     return new FileSettings({
       plugins: ['foo', 'bar'],
       settings: {
-        'eslint-plugin-disable': {
-          plugins: '*',
-        },
+        'disable/plugins': '*',
       },
     });
   };
@@ -31,9 +29,7 @@ test('Processor: setting one plugin', function(t) {
     return new FileSettings({
       plugins: ['foo', 'bar'],
       settings: {
-        'eslint-plugin-disable': {
-          plugins: ['foo'],
-        },
+        'disable/plugins': ['foo'],
       },
     });
   };
@@ -53,9 +49,7 @@ test('Processor: settings multiple plugins', function(t) {
     return new FileSettings({
       plugins: ['foo', 'bar', 'baz'],
       settings: {
-        'eslint-plugin-disable': {
-          plugins: ['foo', 'bar'],
-        },
+        'disable/plugins': ['foo', 'bar'],
       },
     });
   };
@@ -75,9 +69,7 @@ test('Processor: setting keep only available plugins', function(t) {
     return new FileSettings({
       plugins: ['foo'],
       settings: {
-        'eslint-plugin-disable': {
-          plugins: ['foo', 'bar'],
-        },
+        'disable/plugins': ['foo', 'bar'],
       },
     });
   };
@@ -97,9 +89,7 @@ test('Processor: settings all and explicit plugins', function(t) {
     return new FileSettings({
       plugins: ['foo', 'bar', 'baz'],
       settings: {
-        'eslint-plugin-disable': {
-          plugins: ['foo', '*'],
-        },
+        'disable/plugins': ['foo', '*'],
       },
     });
   };
@@ -121,9 +111,7 @@ test('Processor: inline is stronger then settings', function(t) {
     return new FileSettings({
       plugins: ['foo', 'bar'],
       settings: {
-        'eslint-plugin-disable': {
-          plugins: ['bar'],
-        },
+        'disable/plugins': ['bar'],
       },
     });
   };

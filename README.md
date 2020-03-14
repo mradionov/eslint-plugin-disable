@@ -110,9 +110,7 @@ The following config will disable _"import"_ and _"jsx-a11y"_ plugins for all fi
       "files": ["tests/**/*.test.js"],
       "processor": "disable/disable",
       "settings": {
-        "eslint-plugin-disable": {
-          "plugins": ["import", "jsx-a11y"]
-        }
+        "disable/plugins": ["import", "jsx-a11y"]
       }
     }
   ]
@@ -129,9 +127,7 @@ To disable all registered plugins you can simply skip _"settings"_ at all or use
       "files": ["tests/**/*.test.js"],
       "processor": "disable/disable",
       "settings": {
-        "eslint-plugin-disable": {
-+          "plugins": "*"
-        }
++        "disable/plugins": "*"
       }
     }
   ]
@@ -152,10 +148,8 @@ The following config will disable all registered plugins except "react" for all 
       "files": ["tests/**/*.test.js"],
       "processor": "disable/disable",
       "settings": {
-        "eslint-plugin-disable": {
-+          "disableAllExcept": true,
-          "plugins": ["react"]
-        }
++        "disable/disableAllExcept": true,
+        "disable/plugins": ["react"]
       }
     }
   ]
@@ -173,10 +167,8 @@ Most popular case is with "eslint-plugin-vue":
   "plugins": ["vue", "disable"],
   "processor": "disable/disable",
   "settings": {
-    "eslint-plugin-disable": {
-      "plugins": ["vue"],
-+      "externalProcessor": "vue/.vue"
-    }
+    "disable/plugins": ["vue"],
++    "disable/externalProcessor": "vue/.vue"
   }
 }
 ```
@@ -188,11 +180,9 @@ As a plugin might export multiple processors, the only way to find out what "pro
   "plugins": ["vue", "disable"],
   "processor": "disable/disable",
   "settings": {
-    "eslint-plugin-disable": {
-      "plugins": ["vue"],
-+      "externalProcessor": "vue"
--      "externalProcessor": "vue/.vue
-    }
+    "disable/plugins": ["vue"],
++    "disable/externalProcessor": "vue"
+-    "disable/externalProcessor": "vue/.vue
   }
 }
 ```

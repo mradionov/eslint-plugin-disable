@@ -14,8 +14,19 @@ function toPluginsArray(value) {
 
 function FileSettings(eslintFileConfig) {
   const fileConfig = eslintFileConfig || {};
-  const fileConfigSettings = fileConfig.settings || {};
-  const pluginSettings = fileConfigSettings[constants.PLUGIN_NAME] || {};
+  const configSettings = fileConfig.settings || {};
+
+  const pluginSettings = {};
+
+  // Extract all plugin settings by cutting the prefix
+  Object.keys(configSettings).forEach((fullName) => {
+    if (fullName.indexOf(constants.PLUGIN_NAME_SHORT + '/') === 0) {
+      const separatorIndex = fullName.indexOf('/');
+      const shortName = fullName.substring(separatorIndex + 1);
+
+      pluginSettings[shortName] = configSettings[fullName];
+    }
+  });
 
   // Plugins, set in "plugins" option of ESLint config
   this.registeredPlugins = toPluginsArray(fileConfig.plugins || []);

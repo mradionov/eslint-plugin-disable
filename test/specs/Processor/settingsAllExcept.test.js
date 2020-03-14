@@ -11,10 +11,8 @@ test('Processor: all except, settings all plugins', function(t) {
     return new FileSettings({
       plugins: ['foo', 'bar'],
       settings: {
-        'eslint-plugin-disable': {
-          disableAllExcept: true,
-          plugins: '*',
-        },
+        'disable/disableAllExcept': true,
+        'disable/plugins': '*',
       },
     });
   };
@@ -34,10 +32,8 @@ test('Processor: all except, settings one plugin', function(t) {
     return new FileSettings({
       plugins: ['foo', 'bar', 'baz'],
       settings: {
-        'eslint-plugin-disable': {
-          disableAllExcept: true,
-          plugins: ['bar'],
-        },
+        'disable/disableAllExcept': true,
+        'disable/plugins': ['bar'],
       },
     });
   };
@@ -60,10 +56,8 @@ test('Processor: all except, setting multiple plugins', function(t) {
     return new FileSettings({
       plugins: ['foo', 'bar', 'baz'],
       settings: {
-        'eslint-plugin-disable': {
-          disableAllExcept: true,
-          plugins: ['bar', 'foo'],
-        },
+        'disable/disableAllExcept': true,
+        'disable/plugins': ['bar', 'foo'],
       },
     });
   };
@@ -85,10 +79,8 @@ test('Processor: all except, inline is stronger then settings', function(t) {
     return new FileSettings({
       plugins: ['foo', 'bar'],
       settings: {
-        'eslint-plugin-disable': {
-          disableAllExcept: true,
-          plugins: ['bar'],
-        },
+        'disable/disableAllExcept': true,
+        'disable/plugins': ['bar'],
       },
     });
   };
