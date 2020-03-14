@@ -16,14 +16,14 @@
 
 - Example: file path patterns (.eslintrc):
 
-  ```js
+  ```json
   {
     "plugins": ["react", "disable"],
     "override": [
       {
         "files": ["tests/**/*.test.js"],
         "processor": "disable/disable"
-      },
+      }
     ]
   }
   ```
@@ -44,9 +44,9 @@ Add plugin to a config file (.eslintrc) and make it default processor:
     "react",
     "import"
     "jsx-a11y",
-+    "disable"
++   "disable"
   ],
-+  "processor": "disable/disable"
++ "processor": "disable/disable"
 }
 ```
 
@@ -100,20 +100,29 @@ _Notes_:
 
 To disable plugins for file paths use new [ESLint 6+ Overrides](https://eslint.org/docs/user-guide/configuring) feature in config (.eslintrc). It has many different configurations for glob path patterns, ignore patterns and it basically creates a nested config for a list of files ([ESLint docs for more info](https://eslint.org/docs/user-guide/configuring#configuration-based-on-glob-patterns)). This list of files should be assigned with a _"disable/disable"_ processor in order for plugin to work. You can have multiple _"overrides"_ entries with different paths and different plugins to disable.
 
-The following config will disable _"import"_ and _"jsx-a11y"_ plugins for all files matching _"files"_ glob pattern:
+The following config will:
+
+- disable _"import"_ and _"jsx-a11y"_ plugins for all files matching _"tests/\*\*/\*.test.js"_ glob pattern
+- disable _"react"_ plugin for all files matching _"lib/\*.js"_ glob pattern
 
 ```diff
 {
   "plugins": ["import", "react", "jsx-a11y", "disable"],
-  "overrides": [
-    {
-      "files": ["tests/**/*.test.js"],
-      "processor": "disable/disable",
-      "settings": {
-        "disable/plugins": ["import", "jsx-a11y"]
-      }
-    }
-  ]
+  "processor": "disable/disable",
++ "overrides": [
++   {
++     "files": ["tests/**/*.test.js"],
++     "settings": {
++       "disable/plugins": ["import", "jsx-a11y"]
++     }
++   },
++   {
++     "files": ["lib/*.js"],
++     "settings": {
++       "disable/plugins": ["react"]
++     }
++   }
++ ]
 }
 ```
 
@@ -122,12 +131,12 @@ To disable all registered plugins you can simply skip _"settings"_ at all or use
 ```diff
 {
   "plugins": ["import", "react", "jsx-a11y", "disable"],
+  "processor": "disable/disable",
   "overrides": [
     {
       "files": ["tests/**/*.test.js"],
-      "processor": "disable/disable",
       "settings": {
-+        "disable/plugins": "*"
++       "disable/plugins": "*"
       }
     }
   ]
@@ -138,18 +147,18 @@ To disable all registered plugins you can simply skip _"settings"_ at all or use
 
 To disable all plugins except specified ones use `disableAllExcept` flag config settings (.eslintrc).
 
-The following config will disable all registered plugins except "react" for all files mathing "files" glob pattern:
+The following config will disable all registered plugins except _"react"_ for all files mathing _"files"_ glob pattern:
 
 ```diff
 {
   "plugins": ["import", "react", "jsx-a11y", "disable"],
+  "processor": "disable/disable",
   "overrides": [
     {
       "files": ["tests/**/*.test.js"],
-      "processor": "disable/disable",
       "settings": {
-+        "disable/disableAllExcept": true,
-        "disable/plugins": ["react"]
++       "disable/disableAllExcept": true,
++       "disable/plugins": ["react"]
       }
     }
   ]
@@ -158,9 +167,9 @@ The following config will disable all registered plugins except "react" for all 
 
 ## Conflicts with other plugins
 
-Some ESLint plugins also use processors, which creates a conflict with this plugin, because ESLint does not allow to chain processors for the same source files without "processing" it and producing another files. There is a setting "externalProcessor", which accepts a processer identifier "pluginName/processorName" and makes this plugin to call other plugin's processor before disabling the rules.
+Some ESLint plugins also use processors, which creates a conflict with this plugin, because ESLint does not allow to chain processors for the same source files without processing it and producing another files. There is a setting _"externalProcessor"_, which accepts a processor identifier _"pluginName/processorName"_ and makes this plugin to call other plugin's processor before disabling the rules.
 
-Most popular case is with "eslint-plugin-vue":
+One of the cases is _"eslint-plugin-vue"_:
 
 ```diff
 {
@@ -168,12 +177,12 @@ Most popular case is with "eslint-plugin-vue":
   "processor": "disable/disable",
   "settings": {
     "disable/plugins": ["vue"],
-+    "disable/externalProcessor": "vue/.vue"
++   "disable/externalProcessor": "vue/.vue"
   }
 }
 ```
 
-As a plugin might export multiple processors, the only way to find out what "processorName" to use, is to browse plugin's sources. Also, you can skip "processorName" in identifier and only leave "pluginName" - this way first available processor will be auto-picked.
+As a plugin might export multiple processors, the only way to find out what _"processorName"_ to use, is to browse plugin's sources. If you don't know it, then you can just skip _"processorName"_ in identifier and only leave _"pluginName"_ - this way first available processor will be auto-picked.
 
 ```diff
 {
@@ -181,8 +190,8 @@ As a plugin might export multiple processors, the only way to find out what "pro
   "processor": "disable/disable",
   "settings": {
     "disable/plugins": ["vue"],
-+    "disable/externalProcessor": "vue"
--    "disable/externalProcessor": "vue/.vue
++   "disable/externalProcessor": "vue"
+-   "disable/externalProcessor": "vue/.vue
   }
 }
 ```
@@ -204,6 +213,10 @@ If first option applies, then only plugins mentioned in this option will be used
 | ---------------- | --------------------- |
 | >= 0.16.0 <6.0.0 | <=1.0.5               |
 | >=6.0.0          | >=2.0.0               |
+
+## Migrating
+
+- [1.x to 2.x](MIGRATING.md)
 
 ## Origin
 
