@@ -9,6 +9,7 @@ test('FileSettings: no args', function(t) {
     registeredPlugins: [],
     settingsPlugins: [],
     disableAllExcept: false,
+    externalProcessor: null,
   });
   t.end();
 });
@@ -21,6 +22,7 @@ test('FileSettings: config with empty settings', function(t) {
     registeredPlugins: [],
     settingsPlugins: [],
     disableAllExcept: false,
+    externalProcessor: null,
   });
   t.end();
 });
@@ -33,6 +35,7 @@ test('FileSettings: config with plugins', function(t) {
     registeredPlugins: ['foo', 'bar'],
     settingsPlugins: [],
     disableAllExcept: false,
+    externalProcessor: null,
   });
   t.end();
 });
@@ -52,6 +55,7 @@ test('FileSettings: settings plugins dont overlap with registered plugins', func
     registeredPlugins: ['foo', 'bar'],
     settingsPlugins: ['baz', 'qux'],
     disableAllExcept: false,
+    externalProcessor: null,
   });
   t.end();
 });
@@ -71,6 +75,7 @@ test('FileSettings: settings plugins star stays', function(t) {
     registeredPlugins: ['foo', 'bar'],
     settingsPlugins: ['*'],
     disableAllExcept: false,
+    externalProcessor: null,
   });
   t.end();
 });
@@ -90,6 +95,28 @@ test('FileSettings: settings plugins string', function(t) {
     registeredPlugins: ['foo', 'bar'],
     settingsPlugins: ['foo'],
     disableAllExcept: false,
+    externalProcessor: null,
+  });
+  t.end();
+});
+
+test('FileSettings: settings external processor passthru', function(t) {
+  const config = {
+    plugins: ['foo', 'disable', 'bar'],
+    settings: {
+      'eslint-plugin-disable': {
+        plugins: 'foo',
+        externalProcessor: 'qux/qux',
+      },
+    },
+  };
+  const settings = new FileSettings(config);
+
+  t.deepEqual(settings, {
+    registeredPlugins: ['foo', 'bar'],
+    settingsPlugins: ['foo'],
+    disableAllExcept: false,
+    externalProcessor: 'qux/qux',
   });
   t.end();
 });

@@ -5,7 +5,12 @@ function EngineLoader(moduleLoader) {
 }
 
 EngineLoader.prototype.load = function() {
-  const eslint = this.moduleLoader.load('eslint');
+  let eslint;
+  try {
+    eslint = this.moduleLoader.load('eslint');
+  } catch (err) {
+    throw new PluginError(PluginError.TYPE_ENGINE_LOAD, err);
+  }
 
   // Extra guard if engine fails to load
   try {

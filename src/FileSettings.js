@@ -28,6 +28,10 @@ function FileSettings(eslintFileConfig) {
   // Affects only plugins from settings. Reverses regular behavior to instead
   // disable all registered plugins except the ones specified.
   this.disableAllExcept = pluginSettings.disableAllExcept || false;
+
+  // Pass-thru external processor id if any
+  // Follow processor naming convention ("pluginName/processorName")
+  this.externalProcessor = pluginSettings.externalProcessor || null;
 }
 
 module.exports = FileSettings;

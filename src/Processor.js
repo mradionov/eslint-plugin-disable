@@ -70,7 +70,13 @@ function getSettingsAllExceptPlugins(registeredPlugins, settingsPlugins) {
   return pluginsToDisable;
 }
 
-function Processor(cache, settingsGetter, externalProcessor = null) {
+function Processor(cache, settingsGetter, externalProcessorGetter) {
+  externalProcessorGetter =
+    externalProcessorGetter ||
+    function() {
+      return null;
+    };
+
   // Options are not combined, but executed separately in this order:
   // 1. Disable "all except" via inline comments
   // 2. Disable via inline comments
@@ -80,12 +86,13 @@ function Processor(cache, settingsGetter, externalProcessor = null) {
     // ESLint requires a result to be an array of processable text blocks
     let out = [text];
 
+    // Retrieve settings for current file
+    const settings = settingsGetter(filePath);
+
+    const externalProcessor = externalProcessorGetter(settings);
     if (externalProcessor !== null) {
       out = externalProcessor.preprocess(text, filePath);
     }
-
-    // Retrieve settings for current file
-    const settings = settingsGetter(filePath);
 
     // Do nothing if there is no plugins registered
     if (settings.registeredPlugins.length === 0) {
@@ -191,6 +198,9 @@ function Processor(cache, settingsGetter, externalProcessor = null) {
   }
 
   function postprocess(messages, filePath) {
+    const settings = settingsGetter(filePath);
+    const externalProcessor = externalProcessorGetter(settings);
+
     // No need to postprocess, if file was not preprocessed (has no rule)
     if (cache[filePath] === undefined) {
       if (externalProcessor === null) {

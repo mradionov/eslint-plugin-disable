@@ -1,6 +1,8 @@
 const test = require('tape');
 const proxyquire = require('proxyquire').noPreserveCache();
 
+const tryCatch = require('../helpers/tryCatch');
+
 const ModuleLoader = require('../../src/ModuleLoader');
 const PluginError = require('../../src/PluginError');
 
@@ -16,7 +18,10 @@ test('ModuleLoader: module not found', function(t) {
     moduleLoader.load('eslint');
   };
 
-  t.throws(fn, new PluginError(PluginError.TYPE_MODULE_RESOLVE));
+  const err = tryCatch(fn);
+
+  t.ok(err instanceof PluginError);
+  t.equal(err.type, PluginError.TYPE_MODULE_LOAD);
   t.end();
 });
 
@@ -33,7 +38,7 @@ test('ModuleLoader: loads existing module', function(t) {
 
   const eslint = moduleLoader.load('eslint');
 
-  t.ok(eslint === stub);
+  t.equal(eslint, stub);
   t.end();
 });
 

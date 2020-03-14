@@ -1,5 +1,7 @@
 const test = require('tape');
 
+const tryCatch = require('../helpers/tryCatch');
+
 const EngineLoader = require('../../src/EngineLoader');
 const ModuleLoader = require('../../src/ModuleLoader');
 const PluginError = require('../../src/PluginError');
@@ -17,7 +19,10 @@ test('EngineLoader: eslint not found', function(t) {
     engineLoader.load();
   };
 
-  t.throws(fn, new PluginError(PluginError.TYPE_MODULE_RESOLVE));
+  const err = tryCatch(fn);
+
+  t.ok(err instanceof PluginError);
+  t.equal(err.type, PluginError.TYPE_ENGINE_LOAD);
   t.end();
 });
 
@@ -39,7 +44,10 @@ test('EngineLoader: engine init fails', function(t) {
     engineLoader.load();
   };
 
-  t.throws(fn, new PluginError(PluginError.TYPE_ENGINE_CREATE));
+  const err = tryCatch(fn);
+
+  t.ok(err instanceof PluginError);
+  t.equal(err.type, PluginError.TYPE_ENGINE_CREATE);
   t.end();
 });
 
