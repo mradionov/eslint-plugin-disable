@@ -9,7 +9,7 @@ EngineLoader.prototype.load = function() {
   try {
     eslint = this.moduleLoader.load('eslint');
   } catch (err) {
-    throw new PluginError(PluginError.TYPE_ENGINE_LOAD, err);
+    throw PluginError.create(PluginError.TYPE_ENGINE_LOAD, err);
   }
 
   // Extra guard if engine fails to load
@@ -17,7 +17,7 @@ EngineLoader.prototype.load = function() {
     const engine = new eslint.CLIEngine();
     return engine;
   } catch (err) {
-    throw new PluginError(PluginError.TYPE_ENGINE_CREATE, err);
+    throw PluginError.create(PluginError.TYPE_ENGINE_CREATE, err);
   }
 };
 

@@ -13,7 +13,7 @@ ModuleLoader.prototype.load = function(path) {
     const loadedModule = require(resolvedPath);
     return loadedModule;
   } catch (err) {
-    throw new PluginError(PluginError.TYPE_MODULE_LOAD, err);
+    throw PluginError.create(PluginError.TYPE_MODULE_LOAD, err);
   }
 };
 
@@ -33,7 +33,7 @@ ModuleLoader.prototype.resolve = function(path) {
   try {
     return require.resolve(path);
   } catch (err) {
-    throw new PluginError(PluginError.TYPE_MODULE_RESOLVE, err);
+    throw PluginError.create(PluginError.TYPE_MODULE_RESOLVE, err);
   }
 };
 

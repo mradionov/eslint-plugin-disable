@@ -9,7 +9,7 @@ function ExternalProcessorLoader(moduleLoader) {
 
 ExternalProcessorLoader.prototype.load = function(identifier) {
   if (typeof identifier !== 'string') {
-    throw new PluginError(PluginError.TYPE_EXTERNAL_PROCESSOR_INVALID_ID);
+    throw PluginError.create(PluginError.TYPE_EXTERNAL_PROCESSOR_INVALID_ID);
   }
 
   if (this.loaded[identifier] !== undefined) {
@@ -31,7 +31,7 @@ ExternalProcessorLoader.prototype.load = function(identifier) {
   try {
     pluginModule = this.moduleLoader.load(pluginModuleName) || {};
   } catch (err) {
-    throw new PluginError(PluginError.TYPE_EXTERNAL_PROCESSOR_LOAD, err);
+    throw PluginError.create(PluginError.TYPE_EXTERNAL_PROCESSOR_LOAD, err);
   }
 
   const pluginProcessors = pluginModule.processors || {};
@@ -39,7 +39,7 @@ ExternalProcessorLoader.prototype.load = function(identifier) {
 
   // No processors at all
   if (pluginProcessorNames.length === 0) {
-    throw new PluginError(PluginError.TYPE_EXTERNAL_PROCESSOR_NOT_FOUND);
+    throw PluginError.create(PluginError.TYPE_EXTERNAL_PROCESSOR_NOT_FOUND);
   }
 
   // If user set specific processor name ("pluginName/processorName")
@@ -48,7 +48,7 @@ ExternalProcessorLoader.prototype.load = function(identifier) {
     processorName !== undefined &&
     pluginProcessors[processorName] === undefined
   ) {
-    throw new PluginError(PluginError.TYPE_EXTERNAL_PROCESSOR_NOT_FOUND);
+    throw PluginError.create(PluginError.TYPE_EXTERNAL_PROCESSOR_NOT_FOUND);
   }
 
   if (processorName === undefined) {

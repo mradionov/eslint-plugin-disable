@@ -49,41 +49,12 @@ function Plugin(moduleLoader) {
 
     processors[constants.PLUGIN_PROCESSOR_NAME] = processor;
   } catch (err) {
-    let message = err.message;
-
     if (err instanceof PluginError) {
-      switch (err.type) {
-        case PluginError.TYPE_MODULE_RESOLVE:
-          message =
-            'Could not resolve path to NPM module. It might not be installed.';
-          break;
-        case PluginError.TYPE_MODULE_LOAD:
-          message =
-            'Could not load NPM module. There might be an error in NPM module.';
-          break;
-        case PluginError.TYPE_ENGINE_LOAD:
-          message = 'Could not load "eslint". Check if it is installed.';
-          break;
-        case PluginError.TYPE_ENGINE_CREATE:
-          message = 'Could not create ESLint CLIEngine.';
-          break;
-        case PluginError.TYPE_EXTERNAL_PROCESSOR_INVALID_ID:
-          message =
-            'External processor identifier is invalid. Use "pluginName/processorName" format.';
-          break;
-        case PluginError.TYPE_EXTERNAL_PROCESSOR_LOAD:
-          message =
-            'Could not load external processor. Check if it is installed.';
-          break;
-        case PluginError.TYPE_EXTERNAL_PROCESSOR_NOT_FOUND:
-          message =
-            'Could not find an external processor with that name in a plugin. Check the name of exported processor name in plugin source.';
-          break;
-      }
+      throw err;
     }
 
     const error = new Error();
-    error.message = '[' + constants.PLUGIN_NAME + '] ' + message;
+    error.message = '[' + constants.PLUGIN_NAME + '] ' + err.message;
     error.stack = err.stack;
     throw error;
   }
