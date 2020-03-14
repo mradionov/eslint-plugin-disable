@@ -54,7 +54,7 @@ PluginError.create = function(code, originalError) {
       break;
     case PluginError.TYPE_EXTERNAL_PROCESSOR_NOT_FOUND:
       message =
-        'Could not find an external processor with that name in a plugin. Check the name of exported processor name in plugin source.';
+        'Could not find external processor with that name. Check the name of exported processor in external plugin source.';
       break;
   }
 
