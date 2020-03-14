@@ -1,13 +1,13 @@
 const constants = require('./constants');
 
-function PluginError(type, originalError) {
+function PluginError(code, originalError) {
   // you can pass original error object, if re-throwing to keep it's info
   originalError = originalError || {};
 
-  const customMessage = '[' + constants.PLUGIN_NAME + '] Error: ' + type;
+  const customMessage = '[' + constants.PLUGIN_NAME + '] Error: ' + code;
 
   this.name = 'PluginError';
-  this.type = type;
+  this.code = code;
   this.message = originalError.message || customMessage;
   this.stack = originalError.stack;
 }

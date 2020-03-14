@@ -21,7 +21,7 @@ test('ModuleLoader: module not found', function(t) {
   const err = tryCatch(fn);
 
   t.ok(err instanceof PluginError);
-  t.equal(err.type, PluginError.TYPE_MODULE_LOAD);
+  t.equal(err.code, PluginError.TYPE_MODULE_LOAD);
   t.end();
 });
 

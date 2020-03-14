@@ -21,7 +21,7 @@ test('ExternalProcessorLoader: no string identifier', function(t) {
   const err = tryCatch(fn);
 
   t.ok(err instanceof PluginError);
-  t.equal(err.type, PluginError.TYPE_EXTERNAL_PROCESSOR_INVALID_ID);
+  t.equal(err.code, PluginError.TYPE_EXTERNAL_PROCESSOR_INVALID_ID);
   t.end();
 });
 
@@ -41,7 +41,7 @@ test('ExternalProcessorLoader: plugin not found', function(t) {
   const err = tryCatch(fn);
 
   t.ok(err instanceof PluginError);
-  t.equal(err.type, PluginError.TYPE_EXTERNAL_PROCESSOR_LOAD);
+  t.equal(err.code, PluginError.TYPE_EXTERNAL_PROCESSOR_LOAD);
   t.end();
 });
 
@@ -61,7 +61,7 @@ test('ExternalProcessorLoader: no processors in plugin', function(t) {
   const err = tryCatch(fn);
 
   t.ok(err instanceof PluginError);
-  t.equal(err.type, PluginError.TYPE_EXTERNAL_PROCESSOR_NOT_FOUND);
+  t.equal(err.code, PluginError.TYPE_EXTERNAL_PROCESSOR_NOT_FOUND);
   t.end();
 });
 
@@ -88,7 +88,7 @@ test('ExternalProcessorLoader: wrong processor name', function(t) {
   const err = tryCatch(fn);
 
   t.ok(err instanceof PluginError);
-  t.equal(err.type, PluginError.TYPE_EXTERNAL_PROCESSOR_NOT_FOUND);
+  t.equal(err.code, PluginError.TYPE_EXTERNAL_PROCESSOR_NOT_FOUND);
   t.end();
 });
 

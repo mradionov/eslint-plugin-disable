@@ -3,6 +3,7 @@ const EngineLoader = require('./EngineLoader');
 const ExternalProcessorLoader = require('./ExternalProcessorLoader');
 const FileSettings = require('./FileSettings');
 const PluginError = require('./PluginError');
+const Processor = require('./Processor');
 
 function Plugin(moduleLoader) {
   const processors = {};
@@ -81,7 +82,10 @@ function Plugin(moduleLoader) {
       }
     }
 
-    console.error('[' + constants.PLUGIN_NAME + ']', message, err);
+    const error = new Error();
+    error.message = '[' + constants.PLUGIN_NAME + '] ' + message;
+    error.stack = err.stack;
+    throw error;
   }
 
   return { processors };

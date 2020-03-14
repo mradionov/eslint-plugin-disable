@@ -22,7 +22,7 @@ test('EngineLoader: eslint not found', function(t) {
   const err = tryCatch(fn);
 
   t.ok(err instanceof PluginError);
-  t.equal(err.type, PluginError.TYPE_ENGINE_LOAD);
+  t.equal(err.code, PluginError.TYPE_ENGINE_LOAD);
   t.end();
 });
 
@@ -47,7 +47,7 @@ test('EngineLoader: engine init fails', function(t) {
   const err = tryCatch(fn);
 
   t.ok(err instanceof PluginError);
-  t.equal(err.type, PluginError.TYPE_ENGINE_CREATE);
+  t.equal(err.code, PluginError.TYPE_ENGINE_CREATE);
   t.end();
 });
 
