@@ -7,7 +7,7 @@
 - Example: inline comments:
 
   ```js
-  /* eslint-plugin-disable angular */
+  /* eslint-plugin-disable react */
 
   function greet(name) {
     console.log('Hi, ' + name);
@@ -19,10 +19,13 @@
   ```json
   {
     "plugins": ["react", "disable"],
-    "override": [
+    "processor": "disable/disable",
+    "overrides": [
       {
         "files": ["tests/**/*.test.js"],
-        "processor": "disable/disable"
+        "settings": {
+          "disable/plugins": ["react"]
+        }
       }
     ]
   }
@@ -38,15 +41,10 @@ npm install eslint-plugin-disable --save-dev
 
 Add plugin to a config file (.eslintrc) and make it default processor:
 
-```diff
+```json
 {
-  "plugins": [
-    "react",
-    "import"
-    "jsx-a11y",
-+   "disable"
-  ],
-+ "processor": "disable/disable"
+  "plugins": ["disable"],
+  "processor": "disable/disable"
 }
 ```
 
@@ -54,7 +52,9 @@ Add plugin to a config file (.eslintrc) and make it default processor:
 
 ##### Regular disable
 
-Plugin adds a custom directive to use in files in a form of inline comment, which allows to disable entire plugins for this file. Plugin names have to be the same as in ESLint config file, separated by comma:
+Plugin adds a custom directive to use in files in a form of inline comment, which allows to disable entire plugins for this file. Plugin names have to be the same as in ESLint config file, separated by comma.
+
+The following directive will disable _"react"_ and _"jsx-a11y"_ plugins for this particular file.
 
 ```js
 /* eslint-plugin-disable react, jsx-a11y */
@@ -64,7 +64,7 @@ function greet(name) {
 }
 ```
 
-If no any plugins provided - **all** plugins listed in ESLint config will be disabled:
+If no any plugins provided - **all** plugins registered in ESLint config will be disabled:
 
 ```js
 /* eslint-plugin-disable */
@@ -76,7 +76,9 @@ function greet(name) {
 
 ##### Disable all except
 
-Another custom option allows to disable all plugins except ones that are specified. It might be useful when there are a lot of plugins in the project and it is required to use one or two of them for particular files, usage of regular disable syntax might be cumbersome to maintain if there are plans to add new plugins to the project. Plugin names have to be the same as in ESLint config file, separated by comma:
+Another custom option allows to disable all plugins except ones that are specified. It might be useful when there are a lot of plugins in the project and it is required to use one or two of them for particular files, usage of regular disable syntax might be cumbersome to maintain if there are plans to add new plugins to the project. Plugin names have to be the same as in ESLint config file, separated by comma.
+
+The following directive will disable all plugins registered in ESLint config except _"react"_ and _"jsx-a11y"_.
 
 ```js
 /* eslint-plugin-disable-all-except react, jsx-a11y */
@@ -89,8 +91,8 @@ function greet(name) {
 _Notes_:
 
 - disable all except: if no plugins specified, then **none** of the plugins listed in ESLint config will be disabled i.e. error messages will not be removed from ESLint report
-- all target files must have a _"disable/disable"_ processor enabled for them, including if you are using [ESLint 6 Overrides](https://eslint.org/docs/user-guide/configuring#specifying-processor) or not
-- whitespace inside option block comment is ignored
+- all target files must have a _"disable/disable"_ processor enabled for them, including usage of [ESLint 6 Overrides](https://eslint.org/docs/user-guide/configuring#specifying-processor)
+- whitespace inside block comment is ignored
 - original file is not modified
 - there is no way to restore behavior with another inline option
 
@@ -105,30 +107,7 @@ The following config will:
 - disable _"import"_ and _"jsx-a11y"_ plugins for all files matching _"tests/\*\*/\*.test.js"_ glob pattern
 - disable _"react"_ plugin for all files matching _"lib/\*.js"_ glob pattern
 
-```diff
-{
-  "plugins": ["import", "react", "jsx-a11y", "disable"],
-  "processor": "disable/disable",
-+ "overrides": [
-+   {
-+     "files": ["tests/**/*.test.js"],
-+     "settings": {
-+       "disable/plugins": ["import", "jsx-a11y"]
-+     }
-+   },
-+   {
-+     "files": ["lib/*.js"],
-+     "settings": {
-+       "disable/plugins": ["react"]
-+     }
-+   }
-+ ]
-}
-```
-
-To disable all registered plugins you can simply skip _"settings"_ at all or use a star:
-
-```diff
+```json
 {
   "plugins": ["import", "react", "jsx-a11y", "disable"],
   "processor": "disable/disable",
@@ -136,7 +115,30 @@ To disable all registered plugins you can simply skip _"settings"_ at all or use
     {
       "files": ["tests/**/*.test.js"],
       "settings": {
-+       "disable/plugins": "*"
+        "disable/plugins": ["import", "jsx-a11y"]
+      }
+    },
+    {
+      "files": ["lib/*.js"],
+      "settings": {
+        "disable/plugins": ["react"]
+      }
+    }
+  ]
+}
+```
+
+To disable all registered plugins you can simply omit _"disable/plugins"_ setting or use a star in place of plugin name:
+
+```json
+{
+  "plugins": ["import", "react", "jsx-a11y", "disable"],
+  "processor": "disable/disable",
+  "overrides": [
+    {
+      "files": ["tests/**/*.test.js"],
+      "settings": {
+        "disable/plugins": "*"
       }
     }
   ]
@@ -145,11 +147,11 @@ To disable all registered plugins you can simply skip _"settings"_ at all or use
 
 ##### Disable all except
 
-To disable all plugins except specified ones use `disableAllExcept` flag config settings (.eslintrc).
+To disable all plugins except specified ones use _"disableAllExcept"_ flag in config settings (.eslintrc).
 
-The following config will disable all registered plugins except _"react"_ for all files mathing _"files"_ glob pattern:
+The following config will disable all registered plugins except _"react"_ for all files mathing _"tests/\*\*\/\*.test.js"_ glob pattern (_"import"_ and _"jsx-a11y"_ will be disabled).
 
-```diff
+```json
 {
   "plugins": ["import", "react", "jsx-a11y", "disable"],
   "processor": "disable/disable",
@@ -157,8 +159,8 @@ The following config will disable all registered plugins except _"react"_ for al
     {
       "files": ["tests/**/*.test.js"],
       "settings": {
-+       "disable/disableAllExcept": true,
-+       "disable/plugins": ["react"]
+        "disable/disableAllExcept": true,
+        "disable/plugins": ["react"]
       }
     }
   ]
@@ -171,27 +173,26 @@ Some ESLint plugins also use processors, which creates a conflict with this plug
 
 One of the cases is _"eslint-plugin-vue"_:
 
-```diff
+```json
 {
   "plugins": ["vue", "disable"],
   "processor": "disable/disable",
   "settings": {
     "disable/plugins": ["vue"],
-+   "disable/externalProcessor": "vue/.vue"
+    "disable/externalProcessor": "vue/.vue"
   }
 }
 ```
 
-As a plugin might export multiple processors, the only way to find out what _"processorName"_ to use, is to browse plugin's sources. If you don't know it, then you can just skip _"processorName"_ in identifier and only leave _"pluginName"_ - this way first available processor will be auto-picked.
+As a plugin might export multiple processors, the only way to find out what _"processorName"_ to use, is to browse plugin's sources. If you don't know it, then you can just skip _"processorName"_ in identifier and only leave _"pluginName"_ - this way the first available processor will be auto-picked.
 
-```diff
+```json
 {
   "plugins": ["vue", "disable"],
   "processor": "disable/disable",
   "settings": {
     "disable/plugins": ["vue"],
-+   "disable/externalProcessor": "vue"
--   "disable/externalProcessor": "vue/.vue
+    "disable/externalProcessor": "vue"
   }
 }
 ```
@@ -205,7 +206,7 @@ All the options are not merged together, there is a strict order in which they a
 3. Settings paths to disable all plugins except specified ([docs](#disable-all-except-1))
 4. Settings paths to disable specified plugins ([docs](#regular-disable-1))
 
-If first option applies, then only plugins mentioned in this option will be used to disable plugins, the rest of the options down the list will be ignored. If first and second options do not apply (no inline comments in file), but third option does apply, then only plugins mentioned in third option will be used to disable plugins, the rest will be ignored. And so on.
+If first option applies, then only plugins mentioned in this option will be used to disable, the rest of the options down the list will be ignored. If first and second options do not apply (no inline comments in file), but third option does apply, then only plugins mentioned in third option will be used to disable, the rest will be ignored.
 
 ## Support
 
