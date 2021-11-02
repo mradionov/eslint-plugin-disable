@@ -51,7 +51,7 @@ test('EngineLoader: engine init fails', function(t) {
   t.end();
 });
 
-test('EngineLoader: engine load success', function(t) {
+test('EngineLoader: version below 8 engine load success', function(t) {
   const moduleLoaderStub = {
     load: function() {
       const eslintStub = {
@@ -67,6 +67,26 @@ test('EngineLoader: engine load success', function(t) {
 
   const engine = engineLoader.load();
 
-  t.ok(engine.foo, 'bar');
+  t.ok(engine.eslintEngine.foo, 'bar');
+  t.end();
+});
+
+test('EngineLoader: version 8 engine load success', function(t) {
+  const moduleLoaderStub = {
+    load: function() {
+      const eslintStub = {
+        ESLint: function() {
+          this.foo = 'bar';
+        },
+      };
+      return eslintStub;
+    },
+  };
+
+  const engineLoader = new EngineLoader(moduleLoaderStub);
+
+  const engine = engineLoader.load();
+
+  t.ok(engine.eslintEngine.foo, 'bar');
   t.end();
 });
