@@ -1,4 +1,5 @@
 const PluginError = require('./PluginError');
+const engines = require('./Engine');
 
 function EngineLoader(moduleLoader) {
   this.moduleLoader = moduleLoader;
@@ -14,8 +15,10 @@ EngineLoader.prototype.load = function() {
 
   // Extra guard if engine fails to load
   try {
-    const engine = new eslint.CLIEngine();
-    return engine;
+    if (eslint.CLIEngine) {
+      return new engines.EngineBelow8(eslint);
+    }
+    return new engines.Engine8(eslint);
   } catch (err) {
     throw PluginError.create(PluginError.TYPE_ENGINE_CREATE, err);
   }
