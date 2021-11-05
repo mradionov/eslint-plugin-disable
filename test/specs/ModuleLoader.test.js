@@ -50,7 +50,16 @@ test('ModuleLoader: integration - real eslint', function(t) {
   const eslint = moduleLoader.load('eslint');
 
   t.ok(typeof eslint === 'object' && eslint !== null);
-  t.ok(eslint.CLIEngine !== undefined);
+
+  // ESLint 8.x change in API
+  if (eslint.CLIEngine) {
+    t.ok(eslint.CLIEngine !== undefined);
+    t.ok(eslint.ESLint === undefined);
+  } else {
+    t.ok(eslint.CLIEngine === undefined);
+    t.ok(eslint.ESLint !== undefined);
+  }
+
   t.end();
 });
 

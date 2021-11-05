@@ -6,10 +6,22 @@ const EngineLoader = require('../../src/EngineLoader');
 const ModuleLoader = require('../../src/ModuleLoader');
 const PluginError = require('../../src/PluginError');
 
+const FakeESLint = function() {
+  this.type = 'FakeESLint';
+};
+const FakeCLIEngineLegacy = function() {
+  this.type = 'FakeCLIEngineLegacy';
+};
+const FakeCLIEngineBelow8 = function() {
+  this.type = 'FakeCLIEngineBelow8';
+};
+
 test('EngineLoader: eslint not found', function(t) {
   const moduleLoaderStub = {
     load: function() {
-      throw new PluginError(PluginError.TYPE_MODULE_RESOLVE);
+      if (path === 'eslint') {
+        throw new PluginError(PluginError.TYPE_MODULE_RESOLVE);
+      }
     },
   };
 
@@ -26,15 +38,36 @@ test('EngineLoader: eslint not found', function(t) {
   t.end();
 });
 
-test('EngineLoader: engine init fails', function(t) {
+test('EngineLoader: use CLIEngine when version below 8', function(t) {
+  const CLIEngine = function() {};
   const moduleLoaderStub = {
-    load: function() {
-      const eslintStub = {
-        CLIEngine: function() {
-          throw new Error('Init fail');
-        },
-      };
-      return eslintStub;
+    load: function(path) {
+      if (path === 'eslint') {
+        return {
+          CLIEngine: FakeCLIEngineBelow8,
+        };
+      }
+    },
+  };
+
+  const engineLoader = new EngineLoader(moduleLoaderStub);
+
+  const engine = engineLoader.load();
+
+  t.equal(engine.eslintEngine.type, 'FakeCLIEngineBelow8');
+  t.end();
+});
+
+test('EngineLoader: CLIEngine init fails when version below 8', function(t) {
+  const moduleLoaderStub = {
+    load: function(path) {
+      if (path === 'eslint') {
+        return {
+          CLIEngine: function() {
+            throw new Error('Init fail');
+          },
+        };
+      }
     },
   };
 
@@ -51,15 +84,20 @@ test('EngineLoader: engine init fails', function(t) {
   t.end();
 });
 
-test('EngineLoader: engine load success', function(t) {
+test('EngineLoader: use legacy CLI when version 8', function(t) {
+  const CLIEngine = function() {};
   const moduleLoaderStub = {
-    load: function() {
-      const eslintStub = {
-        CLIEngine: function() {
-          this.foo = 'bar';
-        },
-      };
-      return eslintStub;
+    load: function(path) {
+      if (path === 'eslint') {
+        return {
+          ESLint: FakeESLint,
+        };
+      }
+      if (path === 'eslint/lib/cli-engine') {
+        return {
+          CLIEngine: FakeCLIEngineLegacy,
+        };
+      }
     },
   };
 
@@ -67,6 +105,64 @@ test('EngineLoader: engine load success', function(t) {
 
   const engine = engineLoader.load();
 
-  t.ok(engine.foo, 'bar');
+  t.equal(engine.eslintEngine.type, 'FakeCLIEngineLegacy');
+  t.end();
+});
+
+test('EngineLoader: legacy CLIEngine init fails when version 8', function(t) {
+  const moduleLoaderStub = {
+    load: function(path) {
+      if (path === 'eslint') {
+        return {
+          ESLint: FakeESLint,
+        };
+      }
+      if (path === 'eslint/lib/cli-engine') {
+        return {
+          CLIEngine: function() {
+            throw new Error('Init fail');
+          },
+        };
+      }
+    },
+  };
+
+  const engineLoader = new EngineLoader(moduleLoaderStub);
+
+  const fn = function() {
+    engineLoader.load();
+  };
+
+  const err = tryCatch(fn);
+
+  t.ok(err instanceof PluginError);
+  t.equal(err.code, PluginError.TYPE_ENGINE_CREATE);
+  t.end();
+});
+
+test('EngineLoader: legacy CLIEngine not found when version 8', function(t) {
+  const moduleLoaderStub = {
+    load: function(path) {
+      if (path === 'eslint') {
+        return {
+          ESLint: FakeESLint,
+        };
+      }
+      if (path === 'eslint/lib/cli-engine') {
+        throw new PluginError(PluginError.TYPE_MODULE_RESOLVE);
+      }
+    },
+  };
+
+  const engineLoader = new EngineLoader(moduleLoaderStub);
+
+  const fn = function() {
+    engineLoader.load();
+  };
+
+  const err = tryCatch(fn);
+
+  t.ok(err instanceof PluginError);
+  t.equal(err.code, PluginError.TYPE_ENGINE_NOT_SUPPORTED);
   t.end();
 });

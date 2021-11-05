@@ -22,6 +22,7 @@ PluginError.TYPE_MODULE_RESOLVE = 'MODULE_RESOLVE';
 PluginError.TYPE_MODULE_LOAD = 'MODULE_LOAD';
 PluginError.TYPE_ENGINE_LOAD = 'ENGINE_LOAD';
 PluginError.TYPE_ENGINE_CREATE = 'ENGINE_CREATE';
+PluginError.TYPE_ENGINE_NOT_SUPPORTED = 'ENGINE_NOT_SUPPORTED';
 PluginError.TYPE_EXTERNAL_PROCESSOR_INVALID_ID =
   'EXTERNAL_PROCESSOR_INVALID_ID';
 PluginError.TYPE_EXTERNAL_PROCESSOR_LOAD = 'EXTERNAL_PROCESSOR_LOAD';
@@ -44,6 +45,10 @@ PluginError.create = function(code, originalError) {
       break;
     case PluginError.TYPE_ENGINE_CREATE:
       message = 'Could not create ESLint CLIEngine.';
+      break;
+    case PluginError.TYPE_ENGINE_NOT_SUPPORTED:
+      message =
+        'ESLint engine not supported. Please create an issue on GitHub if you see this: https://github.com/mradionov/eslint-plugin-disable';
       break;
     case PluginError.TYPE_EXTERNAL_PROCESSOR_INVALID_ID:
       message =
